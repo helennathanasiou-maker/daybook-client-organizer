@@ -1,0 +1,1061 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f4ef">
+  <title>Daybook — Your client day, in order</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f4f4ef;
+      --surface: #fffefa;
+      --surface-2: #edeee7;
+      --ink: #202722;
+      --muted: #767d75;
+      --line: #dedfd7;
+      --green: #2f735f;
+      --green-soft: #dcebe3;
+      --coral: #d46b55;
+      --coral-soft: #f5e4de;
+      --yellow: #e4c461;
+      --serif: Georgia, "Times New Roman", serif;
+      --sans: "DM Sans", sans-serif;
+      --heading: "Manrope", sans-serif;
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --paper: #171c19;
+      --surface: #202722;
+      --surface-2: #2b332d;
+      --ink: #edf1e9;
+      --muted: #a4aea5;
+      --line: #3a453d;
+      --green: #77b294;
+      --green-soft: #294137;
+      --coral: #e18a72;
+      --coral-soft: #4a302b;
+      --yellow: #d7bd64;
+    }
+    [dir="rtl"] .app { direction: rtl; }
+    [dir="rtl"] .table-wrap { direction: rtl; }
+    [data-theme="dark"] .sidebar { background: #1b211d; }
+    [data-theme="dark"] .topbar { background: rgba(32,39,34,.88); }
+    [data-theme="dark"] .nav-button { color: #bac2ba; }
+    [data-theme="dark"] .nav-button[aria-current="page"] { color: #b7ddc5; }
+    [data-theme="dark"] .welcome { border-color: #3a4b3e; background: linear-gradient(110deg, #293a30 0%, #2b3a31 64%, #304137 100%); }
+    [data-theme="dark"] .welcome-copy .overline { color: #9dc8a9; }
+    [data-theme="dark"] .welcome-copy p { color: #c0cec2; }
+    [data-theme="dark"] .assistant { border-color: #4c4739; background: #2c2a22; }
+    [data-theme="dark"] .assistant-title span { color: #d5c28e; }
+    [data-theme="dark"] .assistant p { color: #d0c8b3; }
+    [data-theme="dark"] .assistant-ask input, [data-theme="dark"] .assistant-reply { border-color: #514a39; background: #22231e; color: var(--ink); }
+    [data-theme="dark"] .assistant-ask button { background: #766b4d; }
+    [data-theme="dark"] .task, [data-theme="dark"] .appointment, [data-theme="dark"] td { border-color: #343d36; }
+    [data-theme="dark"] .schedule-event { border-color: #3a453d; background: #242c26; }
+    [data-theme="dark"] .appt-status { background: #294137; color: #b7ddc5; }
+    [data-theme="dark"] .client-avatar { background: #314238; color: #c0dfc8; }
+    [data-theme="dark"] tbody tr:nth-child(3n+2) .client-avatar { background: #49342f; color: #f0b4a0; }
+    [data-theme="dark"] tbody tr:nth-child(3n) .client-avatar { background: #303d48; color: #c1d6e8; }
+    [data-theme="dark"] .field input, [data-theme="dark"] .field select, [data-theme="dark"] .field textarea { border-color: var(--line); background: #1a211c; color: var(--ink); }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { min-width: 320px; margin: 0; color: var(--ink); background: var(--paper); font: 14px/1.5 var(--sans); }
+    button, input, select, textarea { font: inherit; }
+    button { color: inherit; }
+    .app { display: grid; grid-template-columns: 238px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar { position: sticky; top: 0; display: flex; height: 100vh; flex-direction: column; padding: 26px 17px 18px; border-right: 1px solid var(--line); background: #f8f8f3; }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 0 10px; color: var(--ink); text-decoration: none; }
+    .brand-mark { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 9px 9px 9px 3px; background: var(--green); color: white; font: 700 16px var(--heading); }
+    .brand-name { font: 800 17px var(--heading); letter-spacing: 0; }
+    .workspace { display: flex; align-items: center; gap: 10px; margin: 34px 3px 25px; padding: 11px 10px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); }
+    .workspace-avatar { display: grid; width: 31px; height: 31px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: #e8d8c5; color: #5a4537; font-size: 11px; font-weight: 700; }
+    .workspace-copy { min-width: 0; flex: 1; }
+    .workspace-copy strong, .workspace-copy span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .workspace-copy strong { font-size: 11px; }
+    .workspace-copy span { margin-top: 1px; color: var(--muted); font-size: 10px; }
+    .nav-label { margin: 0 10px 8px; color: #92978d; font-size: 9px; font-weight: 700; text-transform: uppercase; }
+    .nav-list { display: grid; gap: 4px; }
+    .nav-button { display: flex; width: 100%; align-items: center; gap: 12px; padding: 10px 11px; border: 0; border-radius: 4px; background: transparent; color: #59615a; text-align: left; cursor: pointer; }
+    .nav-button:hover { background: var(--surface-2); }
+    .nav-button[aria-current="page"] { background: var(--green-soft); color: #1d5e4a; font-weight: 700; }
+    .nav-icon { display: grid; width: 18px; place-items: center; font: 16px/1 var(--sans); }
+    .nav-count { margin-left: auto; color: var(--muted); font-size: 11px; }
+    .side-bottom { margin-top: auto; }
+    .help-link { display: flex; gap: 10px; align-items: center; padding: 12px 11px; color: var(--muted); text-decoration: none; font-size: 12px; }
+    .profile { display: flex; gap: 10px; align-items: center; margin-top: 13px; padding: 14px 9px 0; border-top: 1px solid var(--line); }
+    .profile img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background: #ddd; }
+    .profile-copy { min-width: 0; }
+    .profile-copy strong, .profile-copy span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .profile-copy strong { font-size: 11px; }
+    .profile-copy span { color: var(--muted); font-size: 10px; }
+    .main { min-width: 0; }
+    .topbar { display: flex; min-height: 74px; align-items: center; justify-content: space-between; gap: 18px; padding: 0 4.2%; border-bottom: 1px solid var(--line); background: rgba(255,254,250,.72); }
+    .breadcrumbs { color: var(--muted); font-size: 12px; }
+    .breadcrumbs strong { color: var(--ink); font-weight: 600; }
+    .top-actions { display: flex; align-items: center; gap: 9px; }
+    .today-label { margin-right: 7px; color: var(--muted); font-size: 11px; }
+    .button { display: inline-flex; min-height: 37px; align-items: center; justify-content: center; gap: 8px; padding: 0 13px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); font-size: 11px; font-weight: 700; cursor: pointer; transition: background .16s, border-color .16s, transform .16s; }
+    .button:hover { border-color: #9da69e; background: #f7f8f2; }
+    .button:active { transform: translateY(1px); }
+    .button-primary { border-color: var(--green); background: var(--green); color: white; }
+    .button-primary:hover { border-color: #235d4c; background: #235d4c; }
+    .icon-button { display: grid; width: 36px; height: 36px; place-items: center; padding: 0; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); cursor: pointer; }
+    .icon-button:hover { background: var(--surface-2); }
+    .content { width: min(1190px, 100%); margin: 0 auto; padding: 34px 4.2% 55px; }
+    .page { display: none; animation: appear .24s ease both; }
+    .page.active { display: block; }
+    .settings-panel { max-width: 720px; }
+    .settings-section { padding: 20px; border-bottom: 1px solid var(--line); }
+    .settings-section:last-child { border-bottom: 0; }
+    .settings-section h2 { margin: 0; font: 700 13px var(--heading); }
+    .settings-section p { margin: 5px 0 15px; color: var(--muted); font-size: 11px; }
+    .segmented { display: inline-flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); }
+    .segment { min-width: 94px; min-height: 34px; padding: 0 12px; border: 0; border-radius: 3px; background: transparent; color: var(--muted); font-size: 11px; font-weight: 600; cursor: pointer; }
+    .segment[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px #1c271c20; }
+    .language-select { width: min(320px, 100%); height: 39px; padding: 0 10px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); color: var(--ink); font-size: 11px; }
+    .auth-shell { display: grid; min-height: 100vh; place-items: center; padding: 24px; background: radial-gradient(ellipse at 18% 0%, #dcebe3 0%, transparent 42%), var(--paper); }
+    .auth-panel { width: min(410px, 100%); padding: 28px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); box-shadow: 0 16px 60px #25342b12; }
+    .auth-panel .brand { padding: 0; }
+    .auth-panel h1 { margin-top: 26px; font-size: 24px; }
+    .auth-intro { margin: 7px 0 20px; color: var(--muted); font-size: 11px; }
+    .auth-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 17px; padding: 4px; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); }
+    .auth-mode { min-height: 34px; border: 0; border-radius: 3px; background: transparent; color: var(--muted); font-size: 11px; font-weight: 700; cursor: pointer; }
+    .auth-mode[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px #1c271c20; }
+    .auth-form { display: grid; gap: 12px; }
+    .auth-form .button { min-height: 40px; margin-top: 3px; }
+    .auth-feedback { min-height: 18px; margin: 13px 0 0; color: var(--muted); font-size: 10px; }
+    .auth-feedback[data-kind="error"] { color: #b14c3a; }
+    .auth-feedback[data-kind="success"] { color: var(--green); }
+    .auth-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 7px; }
+    .auth-actions .text-button { color: var(--muted); }
+    [data-theme="dark"] .auth-shell { background: radial-gradient(ellipse at 18% 0%, #293a30 0%, transparent 42%), var(--paper); }
+    .page-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 25px; }
+    .overline { margin: 0 0 5px; color: var(--green); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    h1 { margin: 0; font: 700 28px/1.2 var(--heading); letter-spacing: 0; }
+    .subtitle { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+    .date-stamp { color: var(--muted); font-size: 11px; }
+    .welcome { display: grid; grid-template-columns: minmax(0,1fr) 165px; min-height: 145px; align-items: center; overflow: hidden; margin-bottom: 22px; border: 1px solid #d5dfd6; border-radius: 5px; background: linear-gradient(110deg, #e4eee6 0%, #e8efe7 64%, #dce8df 100%); }
+    .welcome-copy { padding: 22px 25px; }
+    .welcome-copy .overline { color: #427862; }
+    .welcome-copy h2 { margin: 0; font: 600 25px/1.2 var(--serif); letter-spacing: 0; }
+    .welcome-copy p { max-width: 470px; margin: 7px 0 0; color: #5d6c61; font-size: 12px; }
+    .welcome-art { width: 100%; height: 145px; object-fit: cover; object-position: center 56%; mask-image: linear-gradient(90deg, transparent 0%, black 38%); }
+    .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 23px; }
+    .metric { min-height: 91px; padding: 15px 16px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); }
+    .metric-top { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 10px; }
+    .metric-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+    .metric:nth-child(2) .metric-dot { background: var(--coral); }
+    .metric:nth-child(3) .metric-dot { background: var(--yellow); }
+    .metric:nth-child(4) .metric-dot { background: #7898a2; }
+    .metric-value { margin-top: 7px; font: 700 25px/1 var(--heading); }
+    .dashboard-grid { display: grid; grid-template-columns: minmax(0,1.35fr) minmax(260px,.85fr); gap: 16px; align-items: start; }
+    .panel { min-width: 0; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 17px; border-bottom: 1px solid var(--line); }
+    .panel-head h2 { margin: 0; font: 700 13px var(--heading); letter-spacing: 0; }
+    .text-button { padding: 4px; border: 0; background: transparent; color: var(--green); font-size: 10px; font-weight: 700; cursor: pointer; }
+    .text-button:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .appointment-list { padding: 2px 17px; }
+    .appointment { display: grid; grid-template-columns: 54px 3px minmax(0,1fr) auto; gap: 12px; align-items: center; min-height: 66px; border-bottom: 1px solid #ecece6; }
+    .appointment:last-child { border-bottom: 0; }
+    .appt-time { color: var(--muted); font-size: 10px; }
+    .appt-rule { width: 3px; height: 34px; border-radius: 3px; background: var(--green); }
+    .appointment:nth-child(2n) .appt-rule { background: var(--coral); }
+    .appt-info { min-width: 0; }
+    .appt-info strong { display: block; overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+    .appt-info span { color: var(--muted); font-size: 10px; }
+    .appt-status { padding: 4px 7px; border-radius: 3px; background: var(--green-soft); color: #2b684f; font-size: 9px; }
+    .task-list { padding: 5px 16px 8px; }
+    .task { display: grid; grid-template-columns: 17px minmax(0,1fr) auto; gap: 9px; align-items: start; padding: 11px 0; border-bottom: 1px solid #ecece6; }
+    .task:last-child { border-bottom: 0; }
+    .task input { width: 15px; height: 15px; margin: 2px 0 0; accent-color: var(--green); cursor: pointer; }
+    .task strong { display: block; font-size: 10px; font-weight: 600; }
+    .task span { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
+    .task time { color: #a45241; font-size: 9px; }
+    .assistant { margin-top: 16px; padding: 16px; border: 1px solid #e1d7c6; border-radius: 4px; background: #f7f1e7; }
+    .assistant-title { display: flex; align-items: center; gap: 8px; }
+    .assistant-spark { display: grid; width: 25px; height: 25px; place-items: center; border-radius: 50%; background: #e8d9b8; color: #6d5824; font-size: 14px; }
+    .assistant-title strong { font: 700 11px var(--heading); }
+    .assistant-title span { margin-left: auto; color: #89774f; font-size: 9px; }
+    .assistant p { margin: 9px 0 11px; color: #69624f; font-size: 10px; }
+    .assistant-ask { display: flex; gap: 7px; }
+    .assistant-ask input { width: 100%; min-width: 0; height: 34px; padding: 0 9px; border: 1px solid #ddd2bc; border-radius: 3px; outline: none; background: #fffdf8; font-size: 10px; }
+    .assistant-ask input:focus { border-color: #8a7952; box-shadow: 0 0 0 2px #e8d9b866; }
+    .assistant-ask button { width: 35px; height: 34px; flex: 0 0 auto; border: 0; border-radius: 3px; background: #6e6348; color: white; cursor: pointer; }
+    .assistant-reply { display: none; margin-top: 10px; padding: 10px; border-left: 2px solid #b89a56; background: #fffdf8; color: #5a5547; font-size: 10px; white-space: pre-line; }
+    .assistant-reply.visible { display: block; }
+    .toolbar { display: flex; align-items: center; gap: 9px; }
+    .search { width: min(280px, 42vw); height: 37px; padding: 0 11px; border: 1px solid var(--line); border-radius: 4px; outline: none; background: var(--surface); font-size: 11px; }
+    .search:focus { border-color: var(--green); box-shadow: 0 0 0 2px #2f735f22; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
+    th { padding: 11px 15px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 9px; font-weight: 700; text-transform: uppercase; }
+    td { padding: 12px 15px; border-bottom: 1px solid #ecece6; font-size: 10px; }
+    tbody tr:last-child td { border-bottom: 0; }
+    .client-name { display: flex; align-items: center; gap: 9px; font-weight: 700; }
+    .client-avatar { display: grid; width: 29px; height: 29px; place-items: center; border-radius: 50%; background: #e5e9dd; color: #49624f; font-size: 9px; font-weight: 700; }
+    tbody tr:nth-child(3n+2) .client-avatar { background: #f3e5dc; color: #8a5343; }
+    tbody tr:nth-child(3n) .client-avatar { background: #e4e9ef; color: #51677c; }
+    .client-email { color: var(--muted); }
+    .status { display: inline-flex; align-items: center; gap: 5px; color: #37704f; }
+    .status::before { width: 6px; height: 6px; border-radius: 50%; background: #5b9c6f; content: ""; }
+    .empty-state { padding: 35px 20px; color: var(--muted); text-align: center; font-size: 11px; }
+    .schedule-list { display: grid; gap: 0; }
+    .schedule-day { display: grid; grid-template-columns: 112px minmax(0,1fr); padding: 18px; border-bottom: 1px solid var(--line); }
+    .schedule-day:last-child { border-bottom: 0; }
+    .day-label strong { display: block; font: 700 12px var(--heading); }
+    .day-label span { color: var(--muted); font-size: 10px; }
+    .day-events { display: grid; gap: 8px; }
+    .schedule-event { display: grid; grid-template-columns: 58px 3px minmax(0,1fr) auto; gap: 11px; align-items: center; min-height: 49px; padding: 7px 10px; border: 1px solid #e7e8e1; border-radius: 3px; background: #fcfcf8; }
+    .schedule-event .appt-info strong { font-size: 10px; }
+    .followup-row { display: grid; grid-template-columns: 17px minmax(0,1fr) 100px 100px; gap: 12px; align-items: center; padding: 14px 17px; border-bottom: 1px solid #ecece6; }
+    .followup-row:last-child { border-bottom: 0; }
+    .followup-row input { width: 15px; height: 15px; margin: 0; accent-color: var(--green); cursor: pointer; }
+    .followup-main strong { display: block; font-size: 10px; font-weight: 600; }
+    .followup-main span, .followup-client { color: var(--muted); font-size: 9px; }
+    .followup-due { color: #a45241; font-size: 9px; }
+    dialog { width: min(470px, calc(100% - 28px)); max-height: min(90vh, 700px); padding: 0; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--ink); box-shadow: 0 24px 80px #1a251c30; }
+    dialog::backdrop { background: #18231d66; backdrop-filter: blur(2px); }
+    .dialog-head { display: flex; align-items: center; justify-content: space-between; padding: 17px 20px; border-bottom: 1px solid var(--line); }
+    .dialog-head h2 { margin: 0; font: 700 15px var(--heading); }
+    .dialog-body { display: grid; gap: 13px; padding: 20px; }
+    .field { display: grid; gap: 5px; }
+    .field label { color: #5d665e; font-size: 10px; font-weight: 700; }
+    .field input, .field select, .field textarea { width: 100%; min-height: 38px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 3px; outline: none; background: #fff; font-size: 11px; }
+    .field textarea { min-height: 70px; resize: vertical; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--green); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    .dialog-actions { display: flex; justify-content: end; gap: 8px; padding: 0 20px 20px; }
+    .toast { position: fixed; right: 22px; bottom: 22px; z-index: 20; max-width: min(360px, calc(100vw - 32px)); padding: 12px 16px; border-radius: 4px; background: #24352d; color: white; box-shadow: 0 8px 30px #18231d30; font-size: 11px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity .2s, transform .2s; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .mobile-nav { display: none; }
+    :focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+    @keyframes appear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 980px) {
+      .app { grid-template-columns: 205px minmax(0,1fr); }
+      .content { padding-right: 3%; padding-left: 3%; }
+      .metric-grid { grid-template-columns: repeat(2,1fr); }
+      .welcome { grid-template-columns: minmax(0,1fr) 125px; }
+      .dashboard-grid { grid-template-columns: minmax(0,1fr); }
+      .dashboard-side { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      .assistant { margin-top: 0; }
+    }
+    @media (max-width: 680px) {
+      .app { display: block; padding-bottom: 62px; }
+      .sidebar { position: static; display: block; width: 100%; height: auto; padding: 13px 16px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .brand { padding: 0; }
+      .brand-mark { width: 27px; height: 27px; }
+      .workspace, .nav-label, .side-bottom { display: none; }
+      .nav-list { display: flex; gap: 5px; margin-top: 13px; overflow-x: auto; }
+      .nav-button { width: auto; flex: 1; justify-content: center; gap: 6px; padding: 8px 9px; white-space: nowrap; font-size: 10px; }
+      .nav-icon { width: auto; font-size: 14px; }
+      .nav-count { display: none; }
+      .topbar { min-height: 57px; padding: 0 16px; }
+      .breadcrumbs { font-size: 10px; }
+      .today-label { display: none; }
+      .top-actions { gap: 6px; }
+      .top-actions .button { min-height: 33px; padding: 0 9px; font-size: 10px; }
+      .icon-button { width: 33px; height: 33px; }
+      .content { padding: 25px 16px 35px; }
+      .page-heading { align-items: start; margin-bottom: 19px; }
+      .page-heading h1 { font-size: 24px; }
+      .page-heading .button { min-height: 34px; padding: 0 9px; }
+      .welcome { grid-template-columns: minmax(0,1fr) 82px; min-height: 130px; margin-bottom: 15px; }
+      .welcome-copy { padding: 17px; }
+      .welcome-copy h2 { font-size: 21px; }
+      .welcome-copy p { font-size: 10px; }
+      .welcome-art { height: 130px; }
+      .metric-grid { gap: 8px; margin-bottom: 15px; }
+      .metric { min-height: 78px; padding: 12px; }
+      .metric-value { font-size: 22px; }
+      .metric-top { font-size: 9px; }
+      .dashboard-side { grid-template-columns: 1fr; }
+      .appointment { grid-template-columns: 48px 3px minmax(0,1fr); gap: 9px; }
+      .appt-status { display: none; }
+      .search { width: min(190px, 40vw); }
+      .toolbar { gap: 6px; }
+      .toolbar .button { padding: 0 9px; }
+      .schedule-day { grid-template-columns: 1fr; gap: 10px; padding: 14px; }
+      .schedule-event { grid-template-columns: 45px 3px minmax(0,1fr); gap: 8px; }
+      .schedule-event .appt-status { display: none; }
+      .followup-row { grid-template-columns: 17px minmax(0,1fr) auto; gap: 8px; padding: 12px; }
+      .followup-client { display: none; }
+      .table-wrap { margin: 0 -2px; }
+      th, td { padding-right: 11px; padding-left: 11px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <main class="auth-shell" id="auth-shell" hidden>
+    <section class="auth-panel" aria-labelledby="auth-title">
+      <a class="brand" href="#overview" aria-label="Daybook home"><span class="brand-mark" aria-hidden="true">d</span><span class="brand-name">daybook</span></a>
+      <h1 id="auth-title">Sign in to Daybook</h1>
+      <p class="auth-intro" id="auth-intro">Use your account to access your private client workspace.</p>
+      <div class="auth-modes" id="auth-modes" role="group" aria-label="Account action"><button class="auth-mode" type="button" data-auth-mode="signin" aria-pressed="true">Sign in</button><button class="auth-mode" type="button" data-auth-mode="signup" aria-pressed="false">Create account</button></div>
+      <form class="auth-form" id="auth-form">
+        <div class="field" id="auth-email-field"><label for="auth-email">Email address</label><input id="auth-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com"></div>
+        <div class="field"><label for="auth-password">Password</label><input id="auth-password" name="password" type="password" autocomplete="current-password" required minlength="8" maxlength="128" placeholder="At least 8 characters"></div>
+        <button class="button button-primary" id="auth-submit" type="submit">Sign in</button>
+      </form>
+      <div class="auth-actions"><button class="text-button" id="auth-reset" type="button">Forgot password?</button><button class="text-button" id="auth-demo" type="button" hidden>Use local demo</button></div>
+      <p class="auth-feedback" id="auth-feedback" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+  <div class="app" id="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#overview" aria-label="Daybook home"><span class="brand-mark" aria-hidden="true">d</span><span class="brand-name">daybook</span></a>
+      <div class="workspace"><div class="workspace-avatar" aria-hidden="true">SK</div><div class="workspace-copy"><strong>Studio by Sam</strong><span>Solo workspace</span></div><span aria-hidden="true">⌄</span></div>
+      <p class="nav-label">Workspace</p>
+      <nav class="nav-list" aria-label="Main navigation">
+        <button class="nav-button" type="button" data-page="overview" aria-current="page"><span class="nav-icon" aria-hidden="true">◷</span>Overview</button>
+        <button class="nav-button" type="button" data-page="clients"><span class="nav-icon" aria-hidden="true">♙</span>Clients<span class="nav-count" id="client-nav-count"></span></button>
+        <button class="nav-button" type="button" data-page="schedule"><span class="nav-icon" aria-hidden="true">▦</span>Schedule</button>
+        <button class="nav-button" type="button" data-page="followups"><span class="nav-icon" aria-hidden="true">✓</span>Follow-ups<span class="nav-count" id="task-nav-count"></span></button>
+        <button class="nav-button" type="button" data-page="settings"><span class="nav-icon" aria-hidden="true">⚙</span>Settings</button>
+      </nav>
+      <div class="side-bottom">
+        <a class="help-link" href="#assistant" id="assistant-shortcut"><span class="nav-icon" aria-hidden="true">✳</span>Ask your assistant</a>
+        <div class="profile"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80" alt="Sam's profile" referrerpolicy="no-referrer"><div class="profile-copy"><strong>Sam Kim</strong><span>Personal workspace</span></div></div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div class="breadcrumbs">Studio by Sam <span aria-hidden="true">/</span> <strong id="breadcrumb-page">Overview</strong></div>
+        <div class="top-actions"><span class="today-label" id="today-label"></span><button class="button" id="signout-button" type="button" hidden>Sign out</button><button class="icon-button" type="button" id="quick-add" aria-label="Add a new appointment" title="Add appointment">＋</button><button class="button button-primary" type="button" data-open-dialog="client">＋ <span class="add-client-label">Add client</span></button></div>
+      </header>
+      <div class="content">
+        <section class="page active" id="page-overview" aria-labelledby="overview-title">
+          <div class="page-heading"><div><p class="overline" id="greeting">YOUR DAY, AT A GLANCE</p><h1 id="overview-title">Good morning, Sam</h1><p class="subtitle">A little more order for your client work.</p></div><span class="date-stamp" id="overview-date"></span></div>
+          <section class="welcome" aria-label="Daily summary"><div class="welcome-copy"><p class="overline">A clear start</p><h2 id="welcome-title">Your day has room to breathe.</h2><p id="welcome-copy">Take a look at what's ahead, then let the small things take care of themselves.</p></div><img class="welcome-art" src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=500&h=420&q=80" alt="Sunlit workspace with a desk and plants" referrerpolicy="no-referrer"></section>
+          <div class="metric-grid" aria-label="Workspace summary">
+            <article class="metric"><div class="metric-top"><span>Active clients</span><span class="metric-dot"></span></div><div class="metric-value" id="metric-clients">0</div></article>
+            <article class="metric"><div class="metric-top"><span>Sessions today</span><span class="metric-dot"></span></div><div class="metric-value" id="metric-today">0</div></article>
+            <article class="metric"><div class="metric-top"><span>To follow up</span><span class="metric-dot"></span></div><div class="metric-value" id="metric-followups">0</div></article>
+            <article class="metric"><div class="metric-top"><span>Hours booked</span><span class="metric-dot"></span></div><div class="metric-value" id="metric-hours">0h</div></article>
+          </div>
+          <div class="dashboard-grid">
+            <section class="panel" aria-labelledby="today-heading"><div class="panel-head"><h2 id="today-heading">Today's schedule</h2><button class="text-button" type="button" data-go-page="schedule">Full schedule →</button></div><div class="appointment-list" id="today-appointments"></div></section>
+            <div class="dashboard-side">
+              <section class="panel" aria-labelledby="tasks-heading"><div class="panel-head"><h2 id="tasks-heading">A few things to close</h2><button class="text-button" type="button" data-go-page="followups">See all →</button></div><div class="task-list" id="dashboard-tasks"></div></section>
+              <section class="assistant" id="assistant"><div class="assistant-title"><span class="assistant-spark" aria-hidden="true">✳</span><strong>Daybook assistant</strong><span>PREVIEW</span></div><p>Ask what needs attention or get a quick follow-up draft. Suggestions use this demo workspace.</p><form class="assistant-ask" id="assistant-form"><label for="assistant-input" class="visually-hidden" hidden>Ask the Daybook assistant</label><input id="assistant-input" placeholder="What should I focus on?" autocomplete="off"><button type="submit" aria-label="Ask assistant" title="Ask assistant">↗</button></form><div class="assistant-reply" id="assistant-reply" role="status" aria-live="polite"></div></section>
+            </div>
+          </div>
+        </section>
+        <section class="page" id="page-clients" aria-labelledby="clients-title">
+          <div class="page-heading"><div><p class="overline">YOUR PEOPLE</p><h1 id="clients-title">Clients</h1><p class="subtitle">Keep the details close and the relationships personal.</p></div><div class="toolbar"><input class="search" id="client-search" type="search" placeholder="Search clients" aria-label="Search clients"><button class="button button-primary" type="button" data-open-dialog="client">＋ <span class="add-client-label">Add client</span></button></div></div>
+          <section class="panel"><div class="table-wrap"><table><thead><tr><th>Client</th><th>Service</th><th>Email</th><th>Next session</th><th>Status</th></tr></thead><tbody id="client-rows"></tbody></table><div class="empty-state" id="client-empty" hidden>No clients match that search. Add your first client to get started.</div></div></section>
+        </section>
+        <section class="page" id="page-schedule" aria-labelledby="schedule-title">
+          <div class="page-heading"><div><p class="overline">MAKE SPACE FOR THE WORK</p><h1 id="schedule-title">Schedule</h1><p class="subtitle">Appointments coming up in your workspace.</p></div><button class="button button-primary" type="button" data-open-dialog="appointment">＋ New appointment</button></div>
+          <section class="panel"><div class="schedule-list" id="schedule-list"></div></section>
+        </section>
+        <section class="page" id="page-followups" aria-labelledby="followups-title">
+          <div class="page-heading"><div><p class="overline">KEEP THE THREAD</p><h1 id="followups-title">Follow-ups</h1><p class="subtitle">Small reminders that keep good client work moving.</p></div><button class="button button-primary" type="button" id="new-followup">＋ Add reminder</button></div>
+          <section class="panel"><div class="panel-head"><h2>Open reminders</h2><span class="date-stamp" id="followup-open-count"></span></div><div id="followup-list"></div><div class="empty-state" id="followup-empty" hidden>All caught up. Add a reminder whenever something needs a second touch.</div></section>
+        </section>
+        <section class="page" id="page-settings" aria-labelledby="settings-title">
+          <div class="page-heading"><div><p class="overline">MAKE IT YOURS</p><h1 id="settings-title">Settings</h1><p class="subtitle">Choose how Daybook looks and reads.</p></div></div>
+          <section class="panel settings-panel" aria-label="Preferences">
+            <div class="settings-section"><h2>Appearance</h2><p>Choose the theme that feels right for your workspace.</p><div class="segmented" id="theme-group" role="group" aria-label="Color theme"><button class="segment" type="button" data-theme-choice="light" aria-pressed="true">Light</button><button class="segment" type="button" data-theme-choice="dark" aria-pressed="false">Dark</button></div></div>
+            <div class="settings-section"><h2>Language</h2><p>Set the language used across the app.</p><label for="language-select" class="visually-hidden" hidden>Language</label><select class="language-select" id="language-select"><option value="en">English</option><option value="az">Azərbaycanca</option><option value="ar">العربية</option><option value="zh">中文（简体）</option><option value="fr">Français</option><option value="de">Deutsch</option><option value="hi">हिन्दी</option><option value="pt">Português</option><option value="ru">Русский</option><option value="es">Español</option><option value="tr">Türkçe</option></select></div>
+          </section>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <dialog id="client-dialog" aria-labelledby="client-dialog-title">
+    <form id="client-form">
+      <div class="dialog-head"><h2 id="client-dialog-title">Add a client</h2><button class="icon-button" type="button" data-close-dialog aria-label="Close dialog">×</button></div>
+      <div class="dialog-body"><div class="field"><label for="client-name-input">Full name</label><input id="client-name-input" name="name" required maxlength="70" placeholder="e.g. Maya Chen"></div><div class="field"><label for="client-email-input">Email</label><input id="client-email-input" name="email" type="email" required maxlength="120" placeholder="maya@example.com"></div><div class="field"><label for="client-service-input">What do you work on together?</label><input id="client-service-input" name="service" required maxlength="70" placeholder="e.g. Brand photography"></div><div class="field"><label for="client-note-input">A note (optional)</label><textarea id="client-note-input" name="note" maxlength="250" placeholder="Anything useful to remember"></textarea></div></div>
+      <div class="dialog-actions"><button class="button" type="button" data-close-dialog>Cancel</button><button class="button button-primary" type="submit">Save client</button></div>
+    </form>
+  </dialog>
+  <dialog id="appointment-dialog" aria-labelledby="appointment-dialog-title">
+    <form id="appointment-form">
+      <div class="dialog-head"><h2 id="appointment-dialog-title">New appointment</h2><button class="icon-button" type="button" data-close-dialog aria-label="Close dialog">×</button></div>
+      <div class="dialog-body"><div class="field"><label for="appointment-client">Client</label><select id="appointment-client" name="clientId" required></select></div><div class="field"><label for="appointment-service">Session name</label><input id="appointment-service" name="service" required maxlength="70" placeholder="e.g. Project check-in"></div><div class="field-row"><div class="field"><label for="appointment-date">Date</label><input id="appointment-date" name="date" type="date" required></div><div class="field"><label for="appointment-time">Time</label><input id="appointment-time" name="time" type="time" required></div></div><div class="field"><label for="appointment-duration">Length</label><select id="appointment-duration" name="duration"><option value="30">30 minutes</option><option value="60" selected>1 hour</option><option value="90">1 hour 30 minutes</option><option value="120">2 hours</option></select></div></div>
+      <div class="dialog-actions"><button class="button" type="button" data-close-dialog>Cancel</button><button class="button button-primary" type="submit">Save appointment</button></div>
+    </form>
+  </dialog>
+  <dialog id="followup-dialog" aria-labelledby="followup-dialog-title">
+    <form id="followup-form">
+      <div class="dialog-head"><h2 id="followup-dialog-title">Add a reminder</h2><button class="icon-button" type="button" data-close-dialog aria-label="Close dialog">×</button></div>
+      <div class="dialog-body"><div class="field"><label for="followup-title-input">What needs a follow-up?</label><input id="followup-title-input" name="title" required maxlength="100" placeholder="e.g. Send the revised proposal"></div><div class="field"><label for="followup-client-select">Client</label><select id="followup-client-select" name="clientId" required></select></div><div class="field"><label for="followup-date-input">Remind me on</label><input id="followup-date-input" name="date" type="date" required></div></div>
+      <div class="dialog-actions"><button class="button" type="button" data-close-dialog>Cancel</button><button class="button button-primary" type="submit">Save reminder</button></div>
+    </form>
+  </dialog>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabase-config.js"></script>
+  <script>
+    const storageKey = "daybook-workspace-v1";
+    const preferencesKey = "daybook-preferences-v1";
+    const defaultPreferences = { theme: "light", language: "en" };
+    let preferences = { ...defaultPreferences };
+    try { preferences = { ...defaultPreferences, ...JSON.parse(localStorage.getItem(preferencesKey)) }; }
+    catch { preferences = { ...defaultPreferences }; }
+    const languagePacks = {
+      en: {},
+      az: {
+        "Workspace": "İş sahəsi", "Overview": "İcmal", "Clients": "Müştərilər", "Schedule": "Cədvəl", "Follow-ups": "İzləmələr", "Settings": "Tənzimləmələr", "Ask your assistant": "Assistentdən soruş",
+        "YOUR DAY, AT A GLANCE": "GÜNÜNÜZƏ BİR BAXIŞ", "A little more order for your client work.": "Müştəri işlərinizi daha rahat idarə edin.", "A clear start": "Aydın başlanğıc", "Your day has room to breathe.": "Gününüz daha rahat keçə bilər.", "Take a look at what's ahead, then let the small things take care of themselves.": "Qarşıdakı işlərə baxın, xırda tapşırıqları isə siyahınızda saxlayın.", "Active clients": "Aktiv müştərilər", "Sessions today": "Bugünkü görüşlər", "To follow up": "İzlənəcək işlər", "Hours booked": "Planlaşdırılmış saatlar", "Today's schedule": "Bugünkü cədvəl", "Full schedule →": "Tam cədvəl →", "A few things to close": "Tamamlanmalı işlər", "See all →": "Hamısına bax →",
+        "Daybook assistant": "Daybook köməkçisi", "PREVIEW": "ÖN BAXIŞ", "Ask what needs attention or get a quick follow-up draft. Suggestions use this demo workspace.": "Vacib işləri yoxlayın və ya izləmə mesajı üçün qaralama alın. Təkliflər bu nümunə məlumatlarına əsaslanır.", "YOUR PEOPLE": "MÜŞTƏRİLƏRİNİZ", "Keep the details close and the relationships personal.": "Məlumatları bir yerdə saxlayın, münasibətləri fərdi qurun.", "Search clients": "Müştəri axtar", "Client": "Müştəri", "Service": "Xidmət", "Email": "E-poçt", "Next session": "Növbəti görüş", "Status": "Status", "Active": "Aktiv", "No clients match that search. Add your first client to get started.": "Axtarışa uyğun müştəri yoxdur. Başlamaq üçün ilk müştərinizi əlavə edin.", "MAKE SPACE FOR THE WORK": "İŞ ÜÇÜN VAXT AYIRIN", "Appointments coming up in your workspace.": "Qarşıdakı görüşləriniz.", "＋ New appointment": "＋ Yeni görüş", "KEEP THE THREAD": "ƏLAQƏNİ DAVAM ETDİRİN", "Small reminders that keep good client work moving.": "İşlərin irəliləməsinə kömək edən kiçik xatırlatmalar.", "＋ Add reminder": "＋ Xatırlatma əlavə et", "Open reminders": "Açıq xatırlatmalar", "All caught up. Add a reminder whenever something needs a second touch.": "Hazırda gözləyən iş yoxdur. Lazım olduqda xatırlatma əlavə edin.", "MAKE IT YOURS": "ÖZÜNÜZƏ UYĞUNLAŞDIRIN", "Choose how Daybook looks and reads.": "Daybook-un görünüşünü və dilini seçin.", "Appearance": "Görünüş", "Choose the theme that feels right for your workspace.": "İş sahənizə uyğun mövzunu seçin.", "Light": "Açıq", "Dark": "Tünd", "Language": "Dil", "Set the language used across the app.": "Tətbiqdə istifadə ediləcək dili seçin.",
+        "Add a client": "Müştəri əlavə et", "Full name": "Ad və soyad", "What do you work on together?": "Birlikdə hansı xidmət üzərində işləyirsiniz?", "A note (optional)": "Qeyd (istəyə bağlı)", "Cancel": "Ləğv et", "Save client": "Müştərini saxla", "New appointment": "Yeni görüş", "Session name": "Görüşün adı", "Date": "Tarix", "Time": "Saat", "Length": "Müddət", "30 minutes": "30 dəqiqə", "1 hour": "1 saat", "1 hour 30 minutes": "1 saat 30 dəqiqə", "2 hours": "2 saat", "Save appointment": "Görüşü saxla", "Add a reminder": "Xatırlatma əlavə et", "What needs a follow-up?": "Nəyi izləmək lazımdır?", "Remind me on": "Xatırlatma tarixi", "Save reminder": "Xatırlatmanı saxla", "Today": "Bu gün", "Overdue": "Vaxtı keçib", "Booked": "Planlaşdırılıb", "min": "dəq", "Add your first client to get started.": "Başlamaq üçün ilk müştərinizi əlavə edin.", "No sessions booked today. A little breathing room.": "Bu gün görüş yoxdur. Özünüzə bir az vaxt ayırın.", "Nothing waiting on you. Nice work.": "Gözləyən iş yoxdur. Əla işdir!", "No appointments yet. Add one to start shaping your week.": "Hələ görüş yoxdur. Həftənizi planlamaq üçün görüş əlavə edin.", "Not scheduled": "Planlaşdırılmayıb", "Add a client before creating an appointment.": "Görüş yaratmazdan əvvəl müştəri əlavə edin.", "Add a client before creating a reminder.": "Xatırlatma yaratmazdan əvvəl müştəri əlavə edin.", "Client added to your workspace.": "Müştəri iş sahənizə əlavə edildi.", "Appointment added to your schedule.": "Görüş cədvəlinizə əlavə edildi.", "Reminder added.": "Xatırlatma əlavə edildi.", "Follow-up marked complete.": "İzləmə tamamlandı.", "You have no open follow-ups to draft for. Add a reminder first, and I can help shape it into a message.": "Hazırda qaralama üçün açıq izləmə yoxdur. Əvvəlcə xatırlatma əlavə edin.", "There are no upcoming appointments. Add one from the Schedule page.": "Qarşıda görüş yoxdur. Cədvəl bölməsindən görüş əlavə edin."
+      }
+    };
+    Object.assign(languagePacks, {
+      ar: {
+        "Workspace": "مساحة العمل", "Overview": "نظرة عامة", "Clients": "العملاء", "Schedule": "الجدول", "Follow-ups": "المتابعات", "Settings": "الإعدادات", "Ask your assistant": "اسأل المساعد",
+        "YOUR DAY, AT A GLANCE": "لمحة عن يومك", "A little more order for your client work.": "نظّم أعمالك مع العملاء بسهولة.", "A clear start": "بداية واضحة", "Your day has room to breathe.": "يومك يسير بهدوء.", "Active clients": "العملاء النشطون", "Sessions today": "جلسات اليوم", "To follow up": "متابعات مطلوبة", "Hours booked": "الساعات المحجوزة", "Today's schedule": "جدول اليوم", "Full schedule →": "الجدول الكامل →", "A few things to close": "مهام تحتاج إلى إنجاز", "See all →": "عرض الكل →", "Daybook assistant": "مساعد Daybook", "PREVIEW": "معاينة",
+        "YOUR PEOPLE": "عملاؤك", "Search clients": "البحث عن العملاء", "Client": "العميل", "Service": "الخدمة", "Email": "البريد الإلكتروني", "Next session": "الجلسة التالية", "Status": "الحالة", "Active": "نشط", "MAKE SPACE FOR THE WORK": "خصّص وقتًا للعمل", "＋ New appointment": "＋ موعد جديد", "KEEP THE THREAD": "حافظ على التواصل", "＋ Add reminder": "＋ إضافة تذكير", "Open reminders": "التذكيرات المفتوحة", "MAKE IT YOURS": "تخصيص الإعدادات", "Appearance": "المظهر", "Light": "فاتح", "Dark": "داكن", "Language": "اللغة", "Add a client": "إضافة عميل", "Full name": "الاسم الكامل", "Cancel": "إلغاء", "Save client": "حفظ العميل", "New appointment": "موعد جديد", "Session name": "اسم الجلسة", "Date": "التاريخ", "Time": "الوقت", "Length": "المدة", "Save appointment": "حفظ الموعد", "Add a reminder": "إضافة تذكير", "What needs a follow-up?": "ما الذي يحتاج إلى متابعة؟", "Remind me on": "ذكّرني في", "Save reminder": "حفظ التذكير", "Today": "اليوم", "Overdue": "متأخر", "Booked": "محجوز", "min": "دقيقة"
+      },
+      zh: {
+        "Workspace": "工作区", "Overview": "概览", "Clients": "客户", "Schedule": "日程", "Follow-ups": "待跟进", "Settings": "设置", "Ask your assistant": "询问助手",
+        "YOUR DAY, AT A GLANCE": "今日概览", "A little more order for your client work.": "让客户事务井然有序。", "A clear start": "清晰开始", "Your day has room to breathe.": "让今天从容一些。", "Active clients": "活跃客户", "Sessions today": "今日会面", "To follow up": "待跟进事项", "Hours booked": "已安排时长", "Today's schedule": "今日安排", "Full schedule →": "完整日程 →", "A few things to close": "待完成事项", "See all →": "查看全部 →", "Daybook assistant": "Daybook 助手", "PREVIEW": "预览",
+        "YOUR PEOPLE": "客户", "Search clients": "搜索客户", "Client": "客户", "Service": "服务", "Email": "邮箱", "Next session": "下次会面", "Status": "状态", "Active": "活跃", "MAKE SPACE FOR THE WORK": "安排工作时间", "＋ New appointment": "＋ 新建预约", "KEEP THE THREAD": "保持联系", "＋ Add reminder": "＋ 添加提醒", "Open reminders": "未完成提醒", "MAKE IT YOURS": "个性化设置", "Appearance": "外观", "Light": "浅色", "Dark": "深色", "Language": "语言", "Add a client": "添加客户", "Full name": "姓名", "Cancel": "取消", "Save client": "保存客户", "New appointment": "新建预约", "Session name": "会面名称", "Date": "日期", "Time": "时间", "Length": "时长", "Save appointment": "保存预约", "Add a reminder": "添加提醒", "What needs a follow-up?": "需要跟进什么？", "Remind me on": "提醒日期", "Save reminder": "保存提醒", "Today": "今天", "Overdue": "已逾期", "Booked": "已预约", "min": "分钟"
+      },
+      fr: {
+        "Workspace": "Espace de travail", "Overview": "Aperçu", "Clients": "Clients", "Schedule": "Agenda", "Follow-ups": "Suivis", "Settings": "Paramètres", "Ask your assistant": "Demander à l’assistant",
+        "YOUR DAY, AT A GLANCE": "VOTRE JOURNÉE EN UN COUP D’ŒIL", "A little more order for your client work.": "Organisez plus facilement votre activité client.", "A clear start": "Bien commencer", "Your day has room to breathe.": "Une journée plus sereine.", "Active clients": "Clients actifs", "Sessions today": "Rendez-vous aujourd’hui", "To follow up": "À relancer", "Hours booked": "Heures planifiées", "Today's schedule": "Programme du jour", "Full schedule →": "Voir l’agenda →", "A few things to close": "Quelques tâches à terminer", "See all →": "Tout voir →", "Daybook assistant": "Assistant Daybook", "PREVIEW": "APERÇU",
+        "YOUR PEOPLE": "VOS CLIENTS", "Search clients": "Rechercher un client", "Client": "Client", "Service": "Prestation", "Email": "E-mail", "Next session": "Prochain rendez-vous", "Status": "Statut", "Active": "Actif", "MAKE SPACE FOR THE WORK": "FAITES DE LA PLACE AU TRAVAIL", "＋ New appointment": "＋ Nouveau rendez-vous", "KEEP THE THREAD": "GARDEZ LE CONTACT", "＋ Add reminder": "＋ Ajouter un rappel", "Open reminders": "Rappels en cours", "MAKE IT YOURS": "PERSONNALISEZ DAYBOOK", "Appearance": "Apparence", "Light": "Clair", "Dark": "Sombre", "Language": "Langue", "Add a client": "Ajouter un client", "Full name": "Nom complet", "Cancel": "Annuler", "Save client": "Enregistrer le client", "New appointment": "Nouveau rendez-vous", "Session name": "Nom du rendez-vous", "Date": "Date", "Time": "Heure", "Length": "Durée", "Save appointment": "Enregistrer le rendez-vous", "Add a reminder": "Ajouter un rappel", "What needs a follow-up?": "Que faut-il suivre ?", "Remind me on": "Me rappeler le", "Save reminder": "Enregistrer le rappel", "Today": "Aujourd’hui", "Overdue": "En retard", "Booked": "Confirmé", "min": "min"
+      },
+      de: {
+        "Workspace": "Arbeitsbereich", "Overview": "Übersicht", "Clients": "Kunden", "Schedule": "Zeitplan", "Follow-ups": "Nachfassaktionen", "Settings": "Einstellungen", "Ask your assistant": "Assistent fragen",
+        "YOUR DAY, AT A GLANCE": "DEIN TAG IM ÜBERBLICK", "A little more order for your client work.": "Organisiere deine Kundenarbeit einfacher.", "A clear start": "Klarer Start", "Your day has room to breathe.": "Dein Tag hat Luft zum Atmen.", "Active clients": "Aktive Kunden", "Sessions today": "Termine heute", "To follow up": "Nachfassaktionen", "Hours booked": "Gebuchte Stunden", "Today's schedule": "Heutiger Zeitplan", "Full schedule →": "Zum Zeitplan →", "A few things to close": "Noch kurz erledigen", "See all →": "Alle ansehen →", "Daybook assistant": "Daybook-Assistent", "PREVIEW": "VORSCHAU",
+        "YOUR PEOPLE": "DEINE KUNDEN", "Search clients": "Kunden suchen", "Client": "Kunde", "Service": "Leistung", "Email": "E-Mail", "Next session": "Nächster Termin", "Status": "Status", "Active": "Aktiv", "MAKE SPACE FOR THE WORK": "ZEIT FÜR DIE ARBEIT SCHAFFEN", "＋ New appointment": "＋ Neuer Termin", "KEEP THE THREAD": "BLEIB IN KONTAKT", "＋ Add reminder": "＋ Erinnerung hinzufügen", "Open reminders": "Offene Erinnerungen", "MAKE IT YOURS": "PASSE DAYBOOK AN", "Appearance": "Darstellung", "Light": "Hell", "Dark": "Dunkel", "Language": "Sprache", "Add a client": "Kunden hinzufügen", "Full name": "Vollständiger Name", "Cancel": "Abbrechen", "Save client": "Kunden speichern", "New appointment": "Neuer Termin", "Session name": "Terminname", "Date": "Datum", "Time": "Uhrzeit", "Length": "Dauer", "Save appointment": "Termin speichern", "Add a reminder": "Erinnerung hinzufügen", "What needs a follow-up?": "Was muss nachverfolgt werden?", "Remind me on": "Erinnerung am", "Save reminder": "Erinnerung speichern", "Today": "Heute", "Overdue": "Überfällig", "Booked": "Gebucht", "min": "Min."
+      },
+      hi: {
+        "Workspace": "कार्यस्थान", "Overview": "अवलोकन", "Clients": "ग्राहक", "Schedule": "कार्यसूची", "Follow-ups": "फ़ॉलो-अप", "Settings": "सेटिंग्स", "Ask your assistant": "सहायक से पूछें",
+        "YOUR DAY, AT A GLANCE": "आज का संक्षिप्त विवरण", "A little more order for your client work.": "अपने ग्राहक कार्य को व्यवस्थित रखें।", "A clear start": "स्पष्ट शुरुआत", "Your day has room to breathe.": "आज का दिन थोड़ा सहज रखें।", "Active clients": "सक्रिय ग्राहक", "Sessions today": "आज की बैठकें", "To follow up": "फ़ॉलो-अप बाकी", "Hours booked": "बुक किए घंटे", "Today's schedule": "आज की कार्यसूची", "Full schedule →": "पूरी कार्यसूची →", "A few things to close": "कुछ काम पूरे करने हैं", "See all →": "सभी देखें →", "Daybook assistant": "Daybook सहायक", "PREVIEW": "पूर्वावलोकन",
+        "YOUR PEOPLE": "आपके ग्राहक", "Search clients": "ग्राहक खोजें", "Client": "ग्राहक", "Service": "सेवा", "Email": "ईमेल", "Next session": "अगली बैठक", "Status": "स्थिति", "Active": "सक्रिय", "MAKE SPACE FOR THE WORK": "काम के लिए समय निकालें", "＋ New appointment": "＋ नई बैठक", "KEEP THE THREAD": "संपर्क बनाए रखें", "＋ Add reminder": "＋ रिमाइंडर जोड़ें", "Open reminders": "खुले रिमाइंडर", "MAKE IT YOURS": "अपनी पसंद के अनुसार", "Appearance": "दिखावट", "Light": "हल्का", "Dark": "गहरा", "Language": "भाषा", "Add a client": "ग्राहक जोड़ें", "Full name": "पूरा नाम", "Cancel": "रद्द करें", "Save client": "ग्राहक सहेजें", "New appointment": "नई बैठक", "Session name": "बैठक का नाम", "Date": "तारीख", "Time": "समय", "Length": "अवधि", "Save appointment": "बैठक सहेजें", "Add a reminder": "रिमाइंडर जोड़ें", "What needs a follow-up?": "किस बात का फ़ॉलो-अप करना है?", "Remind me on": "इस तारीख़ को याद दिलाएँ", "Save reminder": "रिमाइंडर सहेजें", "Today": "आज", "Overdue": "समय सीमा पार", "Booked": "बुक किया गया", "min": "मिनट"
+      },
+      pt: {
+        "Workspace": "Espaço de trabalho", "Overview": "Visão geral", "Clients": "Clientes", "Schedule": "Agenda", "Follow-ups": "Acompanhamentos", "Settings": "Configurações", "Ask your assistant": "Pergunte ao assistente",
+        "YOUR DAY, AT A GLANCE": "SEU DIA EM RESUMO", "A little more order for your client work.": "Organize melhor o trabalho com seus clientes.", "A clear start": "Um começo claro", "Your day has room to breathe.": "Seu dia pode ser mais leve.", "Active clients": "Clientes ativos", "Sessions today": "Reuniões hoje", "To follow up": "Acompanhar", "Hours booked": "Horas agendadas", "Today's schedule": "Agenda de hoje", "Full schedule →": "Ver agenda completa →", "A few things to close": "Algumas tarefas pendentes", "See all →": "Ver tudo →", "Daybook assistant": "Assistente Daybook", "PREVIEW": "PRÉVIA",
+        "YOUR PEOPLE": "SEUS CLIENTES", "Search clients": "Buscar clientes", "Client": "Cliente", "Service": "Serviço", "Email": "E-mail", "Next session": "Próxima reunião", "Status": "Status", "Active": "Ativo", "MAKE SPACE FOR THE WORK": "RESERVE TEMPO PARA O TRABALHO", "＋ New appointment": "＋ Novo compromisso", "KEEP THE THREAD": "MANTENHA O CONTATO", "＋ Add reminder": "＋ Adicionar lembrete", "Open reminders": "Lembretes abertos", "MAKE IT YOURS": "PERSONALIZE O DAYBOOK", "Appearance": "Aparência", "Light": "Claro", "Dark": "Escuro", "Language": "Idioma", "Add a client": "Adicionar cliente", "Full name": "Nome completo", "Cancel": "Cancelar", "Save client": "Salvar cliente", "New appointment": "Novo compromisso", "Session name": "Nome da reunião", "Date": "Data", "Time": "Horário", "Length": "Duração", "Save appointment": "Salvar compromisso", "Add a reminder": "Adicionar lembrete", "What needs a follow-up?": "O que precisa de acompanhamento?", "Remind me on": "Lembrar em", "Save reminder": "Salvar lembrete", "Today": "Hoje", "Overdue": "Atrasado", "Booked": "Agendado", "min": "min"
+      },
+      ru: {
+        "Workspace": "Рабочее пространство", "Overview": "Обзор", "Clients": "Клиенты", "Schedule": "Расписание", "Follow-ups": "Напоминания", "Settings": "Настройки", "Ask your assistant": "Спросить помощника",
+        "YOUR DAY, AT A GLANCE": "ВАШ ДЕНЬ КРАТКО", "A little more order for your client work.": "Управляйте работой с клиентами проще.", "A clear start": "Начните с ясности", "Your day has room to breathe.": "Пусть день станет спокойнее.", "Active clients": "Активные клиенты", "Sessions today": "Встречи сегодня", "To follow up": "Нужно связаться", "Hours booked": "Запланировано часов", "Today's schedule": "План на сегодня", "Full schedule →": "Полное расписание →", "A few things to close": "Осталось завершить", "See all →": "Показать все →", "Daybook assistant": "Помощник Daybook", "PREVIEW": "ПРЕДПРОСМОТР",
+        "YOUR PEOPLE": "ВАШИ КЛИЕНТЫ", "Search clients": "Поиск клиентов", "Client": "Клиент", "Service": "Услуга", "Email": "Эл. почта", "Next session": "Следующая встреча", "Status": "Статус", "Active": "Активен", "MAKE SPACE FOR THE WORK": "НАЙДИТЕ ВРЕМЯ ДЛЯ РАБОТЫ", "＋ New appointment": "＋ Новая встреча", "KEEP THE THREAD": "ОСТАВАЙТЕСЬ НА СВЯЗИ", "＋ Add reminder": "＋ Добавить напоминание", "Open reminders": "Открытые напоминания", "MAKE IT YOURS": "НАСТРОЙТЕ ПОД СЕБЯ", "Appearance": "Оформление", "Light": "Светлая", "Dark": "Тёмная", "Language": "Язык", "Add a client": "Добавить клиента", "Full name": "Полное имя", "Cancel": "Отмена", "Save client": "Сохранить клиента", "New appointment": "Новая встреча", "Session name": "Название встречи", "Date": "Дата", "Time": "Время", "Length": "Длительность", "Save appointment": "Сохранить встречу", "Add a reminder": "Добавить напоминание", "What needs a follow-up?": "Что нужно отследить?", "Remind me on": "Напомнить", "Save reminder": "Сохранить напоминание", "Today": "Сегодня", "Overdue": "Просрочено", "Booked": "Запланировано", "min": "мин"
+      },
+      es: {
+        "Workspace": "Espacio de trabajo", "Overview": "Resumen", "Clients": "Clientes", "Schedule": "Agenda", "Follow-ups": "Seguimientos", "Settings": "Configuración", "Ask your assistant": "Pregunta al asistente",
+        "YOUR DAY, AT A GLANCE": "TU DÍA DE UN VISTAZO", "A little more order for your client work.": "Organiza mejor el trabajo con tus clientes.", "A clear start": "Un comienzo claro", "Your day has room to breathe.": "Tu día puede ser más tranquilo.", "Active clients": "Clientes activos", "Sessions today": "Reuniones de hoy", "To follow up": "Pendientes de seguimiento", "Hours booked": "Horas reservadas", "Today's schedule": "Agenda de hoy", "Full schedule →": "Ver agenda completa →", "A few things to close": "Algunas tareas pendientes", "See all →": "Ver todo →", "Daybook assistant": "Asistente de Daybook", "PREVIEW": "VISTA PREVIA",
+        "YOUR PEOPLE": "TUS CLIENTES", "Search clients": "Buscar clientes", "Client": "Cliente", "Service": "Servicio", "Email": "Correo", "Next session": "Próxima reunión", "Status": "Estado", "Active": "Activo", "MAKE SPACE FOR THE WORK": "HAZ ESPACIO PARA EL TRABAJO", "＋ New appointment": "＋ Nueva cita", "KEEP THE THREAD": "MANTÉN EL CONTACTO", "＋ Add reminder": "＋ Añadir recordatorio", "Open reminders": "Recordatorios pendientes", "MAKE IT YOURS": "PERSONALIZA DAYBOOK", "Appearance": "Apariencia", "Light": "Claro", "Dark": "Oscuro", "Language": "Idioma", "Add a client": "Añadir cliente", "Full name": "Nombre completo", "Cancel": "Cancelar", "Save client": "Guardar cliente", "New appointment": "Nueva cita", "Session name": "Nombre de la sesión", "Date": "Fecha", "Time": "Hora", "Length": "Duración", "Save appointment": "Guardar cita", "Add a reminder": "Añadir recordatorio", "What needs a follow-up?": "¿Qué necesita seguimiento?", "Remind me on": "Recordarme el", "Save reminder": "Guardar recordatorio", "Today": "Hoy", "Overdue": "Atrasado", "Booked": "Reservado", "min": "min"
+      },
+      tr: {
+        "Workspace": "Çalışma alanı", "Overview": "Genel bakış", "Clients": "Müşteriler", "Schedule": "Program", "Follow-ups": "Takipler", "Settings": "Ayarlar", "Ask your assistant": "Asistana sor",
+        "YOUR DAY, AT A GLANCE": "GÜNÜNÜZE GENEL BAKIŞ", "A little more order for your client work.": "Müşteri işlerinizi daha düzenli yönetin.", "A clear start": "Net bir başlangıç", "Your day has room to breathe.": "Gününüz biraz daha rahat geçsin.", "Active clients": "Aktif müşteriler", "Sessions today": "Bugünkü görüşmeler", "To follow up": "Takip edilecekler", "Hours booked": "Planlanan saatler", "Today's schedule": "Bugünün programı", "Full schedule →": "Tüm program →", "A few things to close": "Tamamlanacak birkaç iş", "See all →": "Tümünü gör →", "Daybook assistant": "Daybook asistanı", "PREVIEW": "ÖNİZLEME",
+        "YOUR PEOPLE": "MÜŞTERİLERİNİZ", "Search clients": "Müşteri ara", "Client": "Müşteri", "Service": "Hizmet", "Email": "E-posta", "Next session": "Sonraki görüşme", "Status": "Durum", "Active": "Aktif", "MAKE SPACE FOR THE WORK": "İŞE ZAMAN AYIRIN", "＋ New appointment": "＋ Yeni randevu", "KEEP THE THREAD": "İLETİŞİMİ SÜRDÜRÜN", "＋ Add reminder": "＋ Hatırlatıcı ekle", "Open reminders": "Açık hatırlatıcılar", "MAKE IT YOURS": "DAYBOOK'U ÖZELLEŞTİRİN", "Appearance": "Görünüm", "Light": "Açık", "Dark": "Koyu", "Language": "Dil", "Add a client": "Müşteri ekle", "Full name": "Ad soyad", "Cancel": "İptal", "Save client": "Müşteriyi kaydet", "New appointment": "Yeni randevu", "Session name": "Görüşme adı", "Date": "Tarih", "Time": "Saat", "Length": "Süre", "Save appointment": "Randevuyu kaydet", "Add a reminder": "Hatırlatıcı ekle", "What needs a follow-up?": "Neyin takibi gerekiyor?", "Remind me on": "Hatırlatma tarihi", "Save reminder": "Hatırlatıcıyı kaydet", "Today": "Bugün", "Overdue": "Gecikmiş", "Booked": "Planlandı", "min": "dk"
+      }
+    });
+    const languageExtras = {
+      az: { "Add client": "Müştəri əlavə et", "What should I focus on?": "Nəyə diqqət etməliyəm?", "Add appointment": "Görüş əlavə et", "Add a new appointment": "Yeni görüş əlavə et", "Ask assistant": "Assistentdən soruş", "Color theme": "Rəng mövzusu", "Daily summary": "Gündəlik xülasə", "Workspace summary": "İş sahəsinin xülasəsi", "Keep the details close and the relationships personal.": "Məlumatları bir yerdə saxlayın, münasibətləri fərdi qurun.", "Appointments coming up in your workspace.": "Qarşıdakı görüşləriniz.", "Small reminders that keep good client work moving.": "İşlərin irəliləməsinə kömək edən kiçik xatırlatmalar.", "Choose how Daybook looks and reads.": "Daybook-un görünüşünü və dilini seçin.", "Choose the theme that feels right for your workspace.": "İş sahənizə uyğun mövzunu seçin.", "Set the language used across the app.": "Tətbiqdə istifadə ediləcək dili seçin.", "What do you work on together?": "Birlikdə hansı xidmət üzərində işləyirsiniz?", "A note (optional)": "Qeyd (istəyə bağlı)", "30 minutes": "30 dəqiqə", "1 hour": "1 saat", "1 hour 30 minutes": "1 saat 30 dəqiqə", "2 hours": "2 saat", "Good morning": "Sabahınız xeyir", "Good afternoon": "Günortanız xeyir", "Good evening": "Axşamınız xeyir" },
+      ar: { "Add client": "إضافة عميل", "What should I focus on?": "ما الذي ينبغي أن أركز عليه؟", "Add appointment": "إضافة موعد", "Add a new appointment": "إضافة موعد جديد", "Ask assistant": "اسأل المساعد", "Color theme": "سمة الألوان", "Daily summary": "ملخص اليوم", "Workspace summary": "ملخص مساحة العمل", "Keep the details close and the relationships personal.": "احتفظ بالتفاصيل قريبة واجعل علاقاتك شخصية.", "Appointments coming up in your workspace.": "مواعيدك القادمة.", "Small reminders that keep good client work moving.": "تذكيرات بسيطة تساعد على استمرار العمل مع العملاء.", "Choose how Daybook looks and reads.": "اختر مظهر Daybook ولغته.", "Choose the theme that feels right for your workspace.": "اختر السمة المناسبة لمساحة عملك.", "Set the language used across the app.": "اختر اللغة المستخدمة في التطبيق.", "What do you work on together?": "ما الخدمة التي تقدمها لهذا العميل؟", "A note (optional)": "ملاحظة (اختيارية)", "30 minutes": "٣٠ دقيقة", "1 hour": "ساعة واحدة", "1 hour 30 minutes": "ساعة ونصف", "2 hours": "ساعتان", "Good morning": "صباح الخير", "Good afternoon": "مساء الخير", "Good evening": "مساء الخير" },
+      zh: { "Add client": "添加客户", "What should I focus on?": "我应该优先处理什么？", "Add appointment": "添加预约", "Add a new appointment": "添加新预约", "Ask assistant": "询问助手", "Color theme": "颜色主题", "Daily summary": "每日摘要", "Workspace summary": "工作区摘要", "Keep the details close and the relationships personal.": "集中管理客户信息，保持个性化沟通。", "Appointments coming up in your workspace.": "工作区中的近期预约。", "Small reminders that keep good client work moving.": "用小提醒推动客户工作顺利进行。", "Choose how Daybook looks and reads.": "选择 Daybook 的外观和语言。", "Choose the theme that feels right for your workspace.": "选择适合工作区的主题。", "Set the language used across the app.": "选择应用使用的语言。", "What do you work on together?": "你们合作的服务内容是什么？", "A note (optional)": "备注（可选）", "30 minutes": "30 分钟", "1 hour": "1 小时", "1 hour 30 minutes": "1 小时 30 分钟", "2 hours": "2 小时", "Good morning": "早上好", "Good afternoon": "下午好", "Good evening": "晚上好" },
+      fr: { "Add client": "Ajouter un client", "What should I focus on?": "Sur quoi dois-je me concentrer ?", "Add appointment": "Ajouter un rendez-vous", "Add a new appointment": "Ajouter un rendez-vous", "Ask assistant": "Demander à l’assistant", "Color theme": "Thème de couleur", "Daily summary": "Résumé du jour", "Workspace summary": "Résumé de l’espace", "Keep the details close and the relationships personal.": "Gardez les informations à portée de main et des échanges personnalisés.", "Appointments coming up in your workspace.": "Les rendez-vous à venir dans votre espace.", "Small reminders that keep good client work moving.": "De petits rappels pour faire avancer vos projets clients.", "Choose how Daybook looks and reads.": "Choisissez l’apparence et la langue de Daybook.", "Choose the theme that feels right for your workspace.": "Choisissez le thème adapté à votre espace.", "Set the language used across the app.": "Choisissez la langue de l’application.", "What do you work on together?": "Sur quelle prestation travaillez-vous ensemble ?", "A note (optional)": "Une note (facultatif)", "30 minutes": "30 minutes", "1 hour": "1 heure", "1 hour 30 minutes": "1 h 30", "2 hours": "2 heures", "Good morning": "Bonjour", "Good afternoon": "Bon après-midi", "Good evening": "Bonsoir" },
+      de: { "Add client": "Kunden hinzufügen", "What should I focus on?": "Worauf sollte ich mich konzentrieren?", "Add appointment": "Termin hinzufügen", "Add a new appointment": "Neuen Termin hinzufügen", "Ask assistant": "Assistent fragen", "Color theme": "Farbschema", "Daily summary": "Tagesübersicht", "Workspace summary": "Arbeitsbereich-Übersicht", "Keep the details close and the relationships personal.": "Behalte wichtige Details im Blick und pflege persönliche Beziehungen.", "Appointments coming up in your workspace.": "Anstehende Termine in deinem Arbeitsbereich.", "Small reminders that keep good client work moving.": "Kleine Erinnerungen, damit die Kundenarbeit vorangeht.", "Choose how Daybook looks and reads.": "Lege Erscheinungsbild und Sprache von Daybook fest.", "Choose the theme that feels right for your workspace.": "Wähle das passende Design für deinen Arbeitsbereich.", "Set the language used across the app.": "Wähle die Sprache der App.", "What do you work on together?": "Woran arbeitet ihr gemeinsam?", "A note (optional)": "Notiz (optional)", "30 minutes": "30 Minuten", "1 hour": "1 Stunde", "1 hour 30 minutes": "1 Std. 30 Min.", "2 hours": "2 Stunden", "Good morning": "Guten Morgen", "Good afternoon": "Guten Tag", "Good evening": "Guten Abend" },
+      hi: { "Add client": "ग्राहक जोड़ें", "What should I focus on?": "मुझे किस पर ध्यान देना चाहिए?", "Add appointment": "बैठक जोड़ें", "Add a new appointment": "नई बैठक जोड़ें", "Ask assistant": "सहायक से पूछें", "Color theme": "रंग थीम", "Daily summary": "आज का सारांश", "Workspace summary": "कार्यस्थान सारांश", "Keep the details close and the relationships personal.": "जानकारी पास रखें और ग्राहक संबंधों को व्यक्तिगत बनाएँ।", "Appointments coming up in your workspace.": "आपकी आने वाली बैठकें।", "Small reminders that keep good client work moving.": "ग्राहक कार्य को आगे बढ़ाने वाले छोटे रिमाइंडर।", "Choose how Daybook looks and reads.": "Daybook का रूप और भाषा चुनें।", "Choose the theme that feels right for your workspace.": "अपने कार्यस्थान के लिए थीम चुनें।", "Set the language used across the app.": "ऐप की भाषा चुनें।", "What do you work on together?": "आप साथ में किस सेवा पर काम करते हैं?", "A note (optional)": "नोट (वैकल्पिक)", "30 minutes": "30 मिनट", "1 hour": "1 घंटा", "1 hour 30 minutes": "1 घंटा 30 मिनट", "2 hours": "2 घंटे", "Good morning": "सुप्रभात", "Good afternoon": "नमस्कार", "Good evening": "शुभ संध्या" },
+      pt: { "Add client": "Adicionar cliente", "What should I focus on?": "No que devo me concentrar?", "Add appointment": "Adicionar compromisso", "Add a new appointment": "Adicionar novo compromisso", "Ask assistant": "Pergunte ao assistente", "Color theme": "Tema de cores", "Daily summary": "Resumo do dia", "Workspace summary": "Resumo do espaço", "Keep the details close and the relationships personal.": "Tenha os detalhes por perto e mantenha relações pessoais.", "Appointments coming up in your workspace.": "Próximos compromissos no seu espaço.", "Small reminders that keep good client work moving.": "Pequenos lembretes para manter o trabalho com clientes em andamento.", "Choose how Daybook looks and reads.": "Escolha a aparência e o idioma do Daybook.", "Choose the theme that feels right for your workspace.": "Escolha o tema ideal para seu espaço.", "Set the language used across the app.": "Escolha o idioma do aplicativo.", "What do you work on together?": "Em qual serviço vocês trabalham juntos?", "A note (optional)": "Uma observação (opcional)", "30 minutes": "30 minutos", "1 hour": "1 hora", "1 hour 30 minutes": "1 hora e 30 minutos", "2 hours": "2 horas", "Good morning": "Bom dia", "Good afternoon": "Boa tarde", "Good evening": "Boa noite" },
+      ru: { "Add client": "Добавить клиента", "What should I focus on?": "На чём мне сосредоточиться?", "Add appointment": "Добавить встречу", "Add a new appointment": "Добавить новую встречу", "Ask assistant": "Спросить помощника", "Color theme": "Цветовая тема", "Daily summary": "Сводка за день", "Workspace summary": "Сводка рабочего пространства", "Keep the details close and the relationships personal.": "Держите важные сведения под рукой и сохраняйте личный подход.", "Appointments coming up in your workspace.": "Предстоящие встречи в вашем пространстве.", "Small reminders that keep good client work moving.": "Небольшие напоминания помогают работе с клиентами идти дальше.", "Choose how Daybook looks and reads.": "Настройте внешний вид и язык Daybook.", "Choose the theme that feels right for your workspace.": "Выберите подходящую тему оформления.", "Set the language used across the app.": "Выберите язык приложения.", "What do you work on together?": "Над какой услугой вы работаете вместе?", "A note (optional)": "Заметка (необязательно)", "30 minutes": "30 минут", "1 hour": "1 час", "1 hour 30 minutes": "1 час 30 минут", "2 hours": "2 часа", "Good morning": "Доброе утро", "Good afternoon": "Добрый день", "Good evening": "Добрый вечер" },
+      es: { "Add client": "Añadir cliente", "What should I focus on?": "¿En qué debería centrarme?", "Add appointment": "Añadir cita", "Add a new appointment": "Añadir una nueva cita", "Ask assistant": "Pregunta al asistente", "Color theme": "Tema de color", "Daily summary": "Resumen del día", "Workspace summary": "Resumen del espacio", "Keep the details close and the relationships personal.": "Ten los detalles a mano y mantén una relación personal.", "Appointments coming up in your workspace.": "Próximas citas en tu espacio.", "Small reminders that keep good client work moving.": "Pequeños recordatorios para que el trabajo con clientes avance.", "Choose how Daybook looks and reads.": "Elige el aspecto y el idioma de Daybook.", "Choose the theme that feels right for your workspace.": "Elige el tema adecuado para tu espacio.", "Set the language used across the app.": "Elige el idioma de la aplicación.", "What do you work on together?": "¿En qué servicio trabajáis juntos?", "A note (optional)": "Una nota (opcional)", "30 minutes": "30 minutos", "1 hour": "1 hora", "1 hour 30 minutes": "1 hora y 30 minutos", "2 hours": "2 horas", "Good morning": "Buenos días", "Good afternoon": "Buenas tardes", "Good evening": "Buenas noches" },
+      tr: { "Add client": "Müşteri ekle", "What should I focus on?": "Neye odaklanmalıyım?", "Add appointment": "Randevu ekle", "Add a new appointment": "Yeni randevu ekle", "Ask assistant": "Asistana sor", "Color theme": "Renk teması", "Daily summary": "Günlük özet", "Workspace summary": "Çalışma alanı özeti", "Keep the details close and the relationships personal.": "Bilgileri elinizin altında tutun, ilişkileri kişisel kılın.", "Appointments coming up in your workspace.": "Çalışma alanınızdaki yaklaşan randevular.", "Small reminders that keep good client work moving.": "Müşteri işlerini ilerleten küçük hatırlatmalar.", "Choose how Daybook looks and reads.": "Daybook görünümünü ve dilini seçin.", "Choose the theme that feels right for your workspace.": "Çalışma alanınıza uygun temayı seçin.", "Set the language used across the app.": "Uygulama dilini seçin.", "What do you work on together?": "Birlikte hangi hizmet üzerinde çalışıyorsunuz?", "A note (optional)": "Not (isteğe bağlı)", "30 minutes": "30 dakika", "1 hour": "1 saat", "1 hour 30 minutes": "1 saat 30 dakika", "2 hours": "2 saat", "Good morning": "Günaydın", "Good afternoon": "Tünaydın", "Good evening": "İyi akşamlar" }
+    };
+    Object.entries(languageExtras).forEach(([language, phrases]) => Object.assign(languagePacks[language], phrases));
+    const messageExtras = {
+      ar: { "Not scheduled": "غير مجدول", "No sessions booked today. A little breathing room.": "لا توجد جلسات اليوم. خذ بعض الوقت لنفسك.", "Nothing waiting on you. Nice work.": "لا توجد مهام معلقة. أحسنت.", "No appointments yet. Add one to start shaping your week.": "لا توجد مواعيد بعد. أضف موعدًا لتخطيط أسبوعك.", "Add a client before creating an appointment.": "أضف عميلًا قبل إنشاء موعد.", "Add a client before creating a reminder.": "أضف عميلًا قبل إنشاء تذكير.", "Client added to your workspace.": "تمت إضافة العميل إلى مساحة العمل.", "Appointment added to your schedule.": "تمت إضافة الموعد إلى جدولك.", "Reminder added.": "تمت إضافة التذكير.", "Follow-up marked complete.": "تم إكمال المتابعة." },
+      zh: { "Not scheduled": "未安排", "No sessions booked today. A little breathing room.": "今天没有会面，给自己留些空闲。", "Nothing waiting on you. Nice work.": "没有待处理事项，做得不错。", "No appointments yet. Add one to start shaping your week.": "还没有预约。添加一个来安排本周。", "Add a client before creating an appointment.": "请先添加客户，再创建预约。", "Add a client before creating a reminder.": "请先添加客户，再创建提醒。", "Client added to your workspace.": "客户已添加到工作区。", "Appointment added to your schedule.": "预约已添加到日程。", "Reminder added.": "提醒已添加。", "Follow-up marked complete.": "已将跟进标记为完成。" },
+      fr: { "Not scheduled": "Non planifié", "No sessions booked today. A little breathing room.": "Aucun rendez-vous aujourd’hui. Profitez d’un peu de temps libre.", "Nothing waiting on you. Nice work.": "Rien ne vous attend. Beau travail !", "No appointments yet. Add one to start shaping your week.": "Aucun rendez-vous. Ajoutez-en un pour organiser votre semaine.", "Add a client before creating an appointment.": "Ajoutez un client avant de créer un rendez-vous.", "Add a client before creating a reminder.": "Ajoutez un client avant de créer un rappel.", "Client added to your workspace.": "Client ajouté à votre espace.", "Appointment added to your schedule.": "Rendez-vous ajouté à votre agenda.", "Reminder added.": "Rappel ajouté.", "Follow-up marked complete.": "Suivi marqué comme terminé." },
+      de: { "Not scheduled": "Nicht geplant", "No sessions booked today. A little breathing room.": "Heute sind keine Termine geplant. Gönn dir etwas freie Zeit.", "Nothing waiting on you. Nice work.": "Nichts offen. Gute Arbeit!", "No appointments yet. Add one to start shaping your week.": "Noch keine Termine. Füge einen hinzu, um deine Woche zu planen.", "Add a client before creating an appointment.": "Füge zuerst einen Kunden hinzu.", "Add a client before creating a reminder.": "Füge zuerst einen Kunden hinzu.", "Client added to your workspace.": "Kunde zum Arbeitsbereich hinzugefügt.", "Appointment added to your schedule.": "Termin zum Zeitplan hinzugefügt.", "Reminder added.": "Erinnerung hinzugefügt.", "Follow-up marked complete.": "Nachfassaktion abgeschlossen." },
+      hi: { "Not scheduled": "तय नहीं", "No sessions booked today. A little breathing room.": "आज कोई बैठक नहीं है। थोड़ा खाली समय लें।", "Nothing waiting on you. Nice work.": "कोई काम बाकी नहीं है। बहुत बढ़िया।", "No appointments yet. Add one to start shaping your week.": "अभी कोई बैठक नहीं है। अपना सप्ताह तय करने के लिए जोड़ें।", "Add a client before creating an appointment.": "बैठक बनाने से पहले ग्राहक जोड़ें।", "Add a client before creating a reminder.": "रिमाइंडर बनाने से पहले ग्राहक जोड़ें।", "Client added to your workspace.": "ग्राहक कार्यस्थान में जोड़ा गया।", "Appointment added to your schedule.": "बैठक कार्यसूची में जोड़ी गई।", "Reminder added.": "रिमाइंडर जोड़ा गया।", "Follow-up marked complete.": "फ़ॉलो-अप पूरा हुआ।" },
+      pt: { "Not scheduled": "Não agendado", "No sessions booked today. A little breathing room.": "Nenhuma reunião hoje. Aproveite um tempo livre.", "Nothing waiting on you. Nice work.": "Nada pendente. Muito bem!", "No appointments yet. Add one to start shaping your week.": "Ainda não há compromissos. Adicione um para planejar a semana.", "Add a client before creating an appointment.": "Adicione um cliente antes de criar um compromisso.", "Add a client before creating a reminder.": "Adicione um cliente antes de criar um lembrete.", "Client added to your workspace.": "Cliente adicionado ao espaço.", "Appointment added to your schedule.": "Compromisso adicionado à agenda.", "Reminder added.": "Lembrete adicionado.", "Follow-up marked complete.": "Acompanhamento concluído." },
+      ru: { "Not scheduled": "Не запланировано", "No sessions booked today. A little breathing room.": "На сегодня встреч нет. Можно немного передохнуть.", "Nothing waiting on you. Nice work.": "Незавершённых задач нет. Отличная работа!", "No appointments yet. Add one to start shaping your week.": "Встреч пока нет. Добавьте встречу, чтобы спланировать неделю.", "Add a client before creating an appointment.": "Сначала добавьте клиента.", "Add a client before creating a reminder.": "Сначала добавьте клиента.", "Client added to your workspace.": "Клиент добавлен в рабочее пространство.", "Appointment added to your schedule.": "Встреча добавлена в расписание.", "Reminder added.": "Напоминание добавлено.", "Follow-up marked complete.": "Напоминание отмечено как выполненное." },
+      es: { "Not scheduled": "Sin programar", "No sessions booked today. A little breathing room.": "Hoy no tienes reuniones. Disfruta de un poco de tiempo libre.", "Nothing waiting on you. Nice work.": "No tienes tareas pendientes. ¡Buen trabajo!", "No appointments yet. Add one to start shaping your week.": "Aún no hay citas. Añade una para organizar tu semana.", "Add a client before creating an appointment.": "Añade un cliente antes de crear una cita.", "Add a client before creating a reminder.": "Añade un cliente antes de crear un recordatorio.", "Client added to your workspace.": "Cliente añadido a tu espacio.", "Appointment added to your schedule.": "Cita añadida a tu agenda.", "Reminder added.": "Recordatorio añadido.", "Follow-up marked complete.": "Seguimiento marcado como completado." },
+      tr: { "Not scheduled": "Planlanmadı", "No sessions booked today. A little breathing room.": "Bugün görüşme yok. Kendinize biraz zaman ayırın.", "Nothing waiting on you. Nice work.": "Bekleyen iş yok. Harika iş!", "No appointments yet. Add one to start shaping your week.": "Henüz randevu yok. Haftanızı planlamak için bir tane ekleyin.", "Add a client before creating an appointment.": "Randevu oluşturmadan önce müşteri ekleyin.", "Add a client before creating a reminder.": "Hatırlatıcı oluşturmadan önce müşteri ekleyin.", "Client added to your workspace.": "Müşteri çalışma alanınıza eklendi.", "Appointment added to your schedule.": "Randevu programınıza eklendi.", "Reminder added.": "Hatırlatıcı eklendi.", "Follow-up marked complete.": "Takip tamamlandı olarak işaretlendi." }
+    };
+    Object.entries(messageExtras).forEach(([language, phrases]) => Object.assign(languagePacks[language], phrases));
+    const authExtras = {
+      az: { "Sign in to Daybook": "Daybook-a daxil olun", "Create your Daybook account": "Daybook hesabınızı yaradın", "Use your account to access your private client workspace.": "Şəxsi müştəri iş sahənizə daxil olmaq üçün hesabınızdan istifadə edin.", "Account action": "Hesab əməliyyatı", "Email address": "E-poçt ünvanı", "Password": "Şifrə", "Sign in": "Daxil ol", "Create account": "Hesab yarat", "Forgot password?": "Şifrəni unutmusunuz?", "At least 8 characters": "Ən azı 8 simvol", "Sign out": "Çıxış", "Cloud account": "Bulud hesabı", "Cloud workspace": "Bulud iş sahəsi", "Cloud setup is incomplete. Check your Supabase URL and public key.": "Bulud ayarları tamamlanmayıb. Supabase URL və açıq açarı yoxlayın.", "Enter your email address first.": "Əvvəlcə e-poçt ünvanınızı daxil edin.", "Check your email to confirm your account, then sign in.": "Hesabınızı təsdiqləmək üçün e-poçtunuzu yoxlayın, sonra daxil olun." },
+      ar: { "Sign in to Daybook": "تسجيل الدخول إلى Daybook", "Create your Daybook account": "إنشاء حساب Daybook", "Use your account to access your private client workspace.": "استخدم حسابك للوصول إلى مساحة عملك الخاصة بالعملاء.", "Account action": "إجراء الحساب", "Email address": "عنوان البريد الإلكتروني", "Password": "كلمة المرور", "Sign in": "تسجيل الدخول", "Create account": "إنشاء حساب", "Forgot password?": "هل نسيت كلمة المرور؟", "At least 8 characters": "٨ أحرف على الأقل", "Sign out": "تسجيل الخروج", "Cloud account": "حساب سحابي", "Cloud workspace": "مساحة عمل سحابية", "Cloud setup is incomplete. Check your Supabase URL and public key.": "إعداد السحابة غير مكتمل. تحقق من رابط Supabase والمفتاح العام.", "Enter your email address first.": "أدخل عنوان بريدك الإلكتروني أولاً.", "Check your email to confirm your account, then sign in.": "تحقق من بريدك لتأكيد الحساب، ثم سجّل الدخول." },
+      zh: { "Sign in to Daybook": "登录 Daybook", "Create your Daybook account": "创建 Daybook 账户", "Use your account to access your private client workspace.": "使用账户访问你的私人客户工作区。", "Account action": "账户操作", "Email address": "电子邮箱", "Password": "密码", "Sign in": "登录", "Create account": "创建账户", "Forgot password?": "忘记密码？", "At least 8 characters": "至少 8 个字符", "Sign out": "退出登录", "Cloud account": "云端账户", "Cloud workspace": "云端工作区", "Cloud setup is incomplete. Check your Supabase URL and public key.": "云端设置不完整。请检查 Supabase URL 和公开密钥。", "Enter your email address first.": "请先输入电子邮箱。", "Check your email to confirm your account, then sign in.": "请查看邮箱并确认账户，然后登录。" },
+      fr: { "Sign in to Daybook": "Se connecter à Daybook", "Create your Daybook account": "Créer votre compte Daybook", "Use your account to access your private client workspace.": "Connectez-vous pour accéder à votre espace client privé.", "Account action": "Action du compte", "Email address": "Adresse e-mail", "Password": "Mot de passe", "Sign in": "Se connecter", "Create account": "Créer un compte", "Forgot password?": "Mot de passe oublié ?", "At least 8 characters": "8 caractères minimum", "Sign out": "Se déconnecter", "Cloud account": "Compte cloud", "Cloud workspace": "Espace cloud", "Cloud setup is incomplete. Check your Supabase URL and public key.": "Configuration cloud incomplète. Vérifiez l’URL Supabase et la clé publique.", "Enter your email address first.": "Saisissez d’abord votre adresse e-mail.", "Check your email to confirm your account, then sign in.": "Confirmez votre compte depuis votre e-mail, puis connectez-vous." },
+      de: { "Sign in to Daybook": "Bei Daybook anmelden", "Create your Daybook account": "Daybook-Konto erstellen", "Use your account to access your private client workspace.": "Melde dich an, um auf deinen privaten Kundenbereich zuzugreifen.", "Account action": "Kontoaktion", "Email address": "E-Mail-Adresse", "Password": "Passwort", "Sign in": "Anmelden", "Create account": "Konto erstellen", "Forgot password?": "Passwort vergessen?", "At least 8 characters": "Mindestens 8 Zeichen", "Sign out": "Abmelden", "Cloud account": "Cloud-Konto", "Cloud workspace": "Cloud-Arbeitsbereich", "Cloud setup is incomplete. Check your Supabase URL and public key.": "Cloud-Einrichtung unvollständig. Prüfe Supabase-URL und öffentlichen Schlüssel.", "Enter your email address first.": "Gib zuerst deine E-Mail-Adresse ein.", "Check your email to confirm your account, then sign in.": "Bestätige dein Konto per E-Mail und melde dich danach an." },
+      hi: { "Sign in to Daybook": "Daybook में साइन इन करें", "Create your Daybook account": "अपना Daybook खाता बनाएँ", "Use your account to access your private client workspace.": "अपने निजी ग्राहक कार्यस्थान के लिए खाते से साइन इन करें।", "Account action": "खाता कार्रवाई", "Email address": "ईमेल पता", "Password": "पासवर्ड", "Sign in": "साइन इन", "Create account": "खाता बनाएँ", "Forgot password?": "पासवर्ड भूल गए?", "At least 8 characters": "कम से कम 8 अक्षर", "Sign out": "साइन आउट", "Cloud account": "क्लाउड खाता", "Cloud workspace": "क्लाउड कार्यस्थान", "Cloud setup is incomplete. Check your Supabase URL and public key.": "क्लाउड सेटअप अधूरा है। Supabase URL और सार्वजनिक कुंजी जाँचें।", "Enter your email address first.": "पहले अपना ईमेल पता दर्ज करें।", "Check your email to confirm your account, then sign in.": "खाता सत्यापित करने के लिए ईमेल देखें, फिर साइन इन करें।" },
+      pt: { "Sign in to Daybook": "Entrar no Daybook", "Create your Daybook account": "Criar sua conta Daybook", "Use your account to access your private client workspace.": "Entre na sua conta para acessar seu espaço privado de clientes.", "Account action": "Ação da conta", "Email address": "Endereço de e-mail", "Password": "Senha", "Sign in": "Entrar", "Create account": "Criar conta", "Forgot password?": "Esqueceu a senha?", "At least 8 characters": "Pelo menos 8 caracteres", "Sign out": "Sair", "Cloud account": "Conta na nuvem", "Cloud workspace": "Espaço na nuvem", "Cloud setup is incomplete. Check your Supabase URL and public key.": "Configuração da nuvem incompleta. Verifique a URL do Supabase e a chave pública.", "Enter your email address first.": "Digite seu endereço de e-mail primeiro.", "Check your email to confirm your account, then sign in.": "Confirme sua conta pelo e-mail e depois entre." },
+      ru: { "Sign in to Daybook": "Войти в Daybook", "Create your Daybook account": "Создать аккаунт Daybook", "Use your account to access your private client workspace.": "Войдите, чтобы открыть личное пространство для работы с клиентами.", "Account action": "Действие с аккаунтом", "Email address": "Электронная почта", "Password": "Пароль", "Sign in": "Войти", "Create account": "Создать аккаунт", "Forgot password?": "Забыли пароль?", "At least 8 characters": "Не менее 8 символов", "Sign out": "Выйти", "Cloud account": "Облачный аккаунт", "Cloud workspace": "Облачное пространство", "Cloud setup is incomplete. Check your Supabase URL and public key.": "Настройка облака не завершена. Проверьте URL Supabase и публичный ключ.", "Enter your email address first.": "Сначала введите адрес электронной почты.", "Check your email to confirm your account, then sign in.": "Подтвердите аккаунт по электронной почте, затем войдите." },
+      es: { "Sign in to Daybook": "Inicia sesión en Daybook", "Create your Daybook account": "Crea tu cuenta de Daybook", "Use your account to access your private client workspace.": "Inicia sesión para acceder a tu espacio privado de clientes.", "Account action": "Acción de cuenta", "Email address": "Correo electrónico", "Password": "Contraseña", "Sign in": "Iniciar sesión", "Create account": "Crear cuenta", "Forgot password?": "¿Olvidaste la contraseña?", "At least 8 characters": "Al menos 8 caracteres", "Sign out": "Cerrar sesión", "Cloud account": "Cuenta en la nube", "Cloud workspace": "Espacio en la nube", "Cloud setup is incomplete. Check your Supabase URL and public key.": "La configuración de la nube está incompleta. Revisa la URL de Supabase y la clave pública.", "Enter your email address first.": "Introduce primero tu correo electrónico.", "Check your email to confirm your account, then sign in.": "Confirma tu cuenta desde el correo y luego inicia sesión." },
+      tr: { "Sign in to Daybook": "Daybook'a giriş yapın", "Create your Daybook account": "Daybook hesabınızı oluşturun", "Use your account to access your private client workspace.": "Özel müşteri çalışma alanınıza erişmek için hesabınızla giriş yapın.", "Account action": "Hesap işlemi", "Email address": "E-posta adresi", "Password": "Şifre", "Sign in": "Giriş yap", "Create account": "Hesap oluştur", "Forgot password?": "Şifrenizi mi unuttunuz?", "At least 8 characters": "En az 8 karakter", "Sign out": "Çıkış yap", "Cloud account": "Bulut hesabı", "Cloud workspace": "Bulut çalışma alanı", "Cloud setup is incomplete. Check your Supabase URL and public key.": "Bulut kurulumu eksik. Supabase URL'sini ve herkese açık anahtarı kontrol edin.", "Enter your email address first.": "Önce e-posta adresinizi girin.", "Check your email to confirm your account, then sign in.": "Hesabınızı doğrulamak için e-postanızı kontrol edin, ardından giriş yapın." }
+    };
+    Object.entries(authExtras).forEach(([language, phrases]) => Object.assign(languagePacks[language], phrases));
+    const importPrompts = {
+      az: "Bu brauzerdə saxlanmış qeydlər var. Onları bu bulud hesabına köçürmək istəyirsiniz?",
+      ar: "توجد سجلات محفوظة في هذا المتصفح. هل تريد استيرادها إلى هذا الحساب السحابي؟",
+      zh: "此浏览器中有已保存的记录。要将它们导入此云账户吗？",
+      fr: "Des données sont enregistrées dans ce navigateur. Voulez-vous les importer dans ce compte cloud ?",
+      de: "In diesem Browser sind gespeicherte Daten vorhanden. Möchtest du sie in dieses Cloud-Konto importieren?",
+      hi: "इस ब्राउज़र में सहेजे गए रिकॉर्ड हैं। क्या आप इन्हें इस क्लाउड खाते में आयात करना चाहते हैं?",
+      pt: "Há registros salvos neste navegador. Deseja importá-los para esta conta na nuvem?",
+      ru: "В этом браузере есть сохранённые записи. Импортировать их в этот облачный аккаунт?",
+      es: "Hay registros guardados en este navegador. ¿Quieres importarlos a esta cuenta en la nube?",
+      tr: "Bu tarayıcıda kayıtlı veriler var. Bunları bu bulut hesabına aktarmak ister misiniz?"
+    };
+    Object.entries(importPrompts).forEach(([language, message]) => { languagePacks[language]["Saved records exist in this browser. Import them into this cloud account?"] = message; });
+    const assistantCopy = {
+      en: { focus: (tasks, count) => `Start with: ${tasks}. You have ${count} appointments today.`, clear: (count) => `No follow-ups are due today. You have ${count} appointments booked.`, draft: (name, task) => `Hi ${name},\n\nJust checking in about ${task.toLowerCase()}. Let me know if you have any questions.\n\nTalk soon,\nSam`, next: (date, time, name, service) => `Your next appointment is ${date} at ${time} with ${name} for ${service}.`, none: "There are no upcoming appointments. Add one from the Schedule page.", fallback: "I can help review today's priorities, check your next appointment, or draft a follow-up. This preview uses saved workspace data." },
+      az: { focus: (tasks, count) => `Başlamaq üçün yaxşı seçim: ${tasks}. Bu gün ${count} görüşünüz var.`, clear: (count) => `Bu gün izlənəcək iş yoxdur. ${count} görüş planlaşdırılıb.`, draft: (name, task) => `Salam, ${name},\n\n${task} ilə bağlı yazıram. Sualınız varsa, mənə bildirin.\n\nGörüşənədək,\nSam`, next: (date, time, name, service) => `Növbəti görüşünüz ${date}, saat ${time} — ${name}: ${service}.`, none: "Qarşıda görüş yoxdur. Cədvəl bölməsindən görüş əlavə edin.", fallback: "Bugünkü prioritetləri yoxlamağa, növbəti görüşünüzü tapmağa və ya izləmə mesajı hazırlamağa kömək edə bilərəm." },
+      ar: { focus: (tasks, count) => `ابدأ بهذه المهام: ${tasks}. لديك ${count} مواعيد اليوم.`, clear: (count) => `لا توجد متابعات مستحقة اليوم. لديك ${count} مواعيد.`, draft: (name, task) => `مرحبًا ${name}،\n\nأتابع معك بخصوص ${task}. أخبرني إن كان لديك أي سؤال.\n\nمع التحية،\nSam`, next: (date, time, name, service) => `موعدك التالي ${date} الساعة ${time} مع ${name} بخصوص ${service}.`, none: "لا توجد مواعيد قادمة. أضف موعدًا من صفحة الجدول.", fallback: "يمكنني مساعدتك في مراجعة أولويات اليوم أو موعدك التالي أو صياغة رسالة متابعة." },
+      zh: { focus: (tasks, count) => `建议先处理：${tasks}。你今天有 ${count} 个预约。`, clear: (count) => `今天没有待跟进事项，已安排 ${count} 个预约。`, draft: (name, task) => `你好，${name}：\n\n想跟进一下${task}。如有任何问题，请告诉我。\n\n祝好，\nSam`, next: (date, time, name, service) => `你的下一个预约是${date} ${time}，客户：${name}，事项：${service}。`, none: "目前没有即将到来的预约。请在日程页面添加预约。", fallback: "我可以帮你查看今日优先事项、下一个预约，或起草跟进消息。" },
+      fr: { focus: (tasks, count) => `Commencez par : ${tasks}. Vous avez ${count} rendez-vous aujourd’hui.`, clear: (count) => `Aucun suivi n’est dû aujourd’hui. ${count} rendez-vous sont prévus.`, draft: (name, task) => `Bonjour ${name},\n\nJe reviens vers vous au sujet de ${task.toLowerCase()}. N’hésitez pas si vous avez des questions.\n\nÀ bientôt,\nSam`, next: (date, time, name, service) => `Votre prochain rendez-vous est ${date} à ${time} avec ${name} pour ${service}.`, none: "Aucun rendez-vous à venir. Ajoutez-en un dans l’agenda.", fallback: "Je peux vous aider à revoir les priorités du jour, votre prochain rendez-vous ou un message de suivi." },
+      de: { focus: (tasks, count) => `Beginne mit: ${tasks}. Heute hast du ${count} Termine.`, clear: (count) => `Heute sind keine Nachfassaktionen fällig. ${count} Termine sind geplant.`, draft: (name, task) => `Hallo ${name},\n\nich wollte wegen ${task.toLowerCase()} nachfragen. Melde dich gern, wenn du Fragen hast.\n\nViele Grüße\nSam`, next: (date, time, name, service) => `Dein nächster Termin ist ${date} um ${time} mit ${name} für ${service}.`, none: "Es stehen keine Termine an. Füge einen im Zeitplan hinzu.", fallback: "Ich helfe dir, heutige Prioritäten, den nächsten Termin oder eine Nachfassnachricht zu prüfen." },
+      hi: { focus: (tasks, count) => `पहले यह करें: ${tasks}। आज आपकी ${count} बैठकें हैं।`, clear: (count) => `आज कोई फ़ॉलो-अप बाकी नहीं है। ${count} बैठकें तय हैं।`, draft: (name, task) => `नमस्ते ${name},\n\n${task} के बारे में बस फ़ॉलो-अप कर रहा/रही हूँ। कोई सवाल हो तो बताइए।\n\nशुभकामनाएँ,\nSam`, next: (date, time, name, service) => `आपकी अगली बैठक ${date} को ${time} बजे ${name} के साथ ${service} के लिए है।`, none: "आने वाली कोई बैठक नहीं है। कार्यसूची में एक जोड़ें।", fallback: "मैं आज के काम, अगली बैठक या फ़ॉलो-अप संदेश का मसौदा बनाने में मदद कर सकता/सकती हूँ।" },
+      pt: { focus: (tasks, count) => `Comece por: ${tasks}. Você tem ${count} compromissos hoje.`, clear: (count) => `Não há acompanhamentos para hoje. Você tem ${count} compromissos agendados.`, draft: (name, task) => `Olá, ${name},\n\nEstou entrando em contato sobre ${task.toLowerCase()}. Se tiver alguma dúvida, é só me avisar.\n\nAté breve,\nSam`, next: (date, time, name, service) => `Seu próximo compromisso é ${date}, às ${time}, com ${name} sobre ${service}.`, none: "Não há compromissos próximos. Adicione um na agenda.", fallback: "Posso ajudar a revisar as prioridades de hoje, seu próximo compromisso ou uma mensagem de acompanhamento." },
+      ru: { focus: (tasks, count) => `Сначала займитесь этим: ${tasks}. Сегодня у вас ${count} встреч.`, clear: (count) => `На сегодня нет задач для связи. Запланировано встреч: ${count}.`, draft: (name, task) => `Здравствуйте, ${name}!\n\nПишу уточнить насчёт задачи «${task}». Если у вас есть вопросы, дайте знать.\n\nДо связи,\nSam`, next: (date, time, name, service) => `Следующая встреча: ${date} в ${time} с ${name}, тема: ${service}.`, none: "Предстоящих встреч нет. Добавьте её в расписании.", fallback: "Помогу проверить приоритеты на сегодня, следующую встречу или подготовить сообщение для связи." },
+      es: { focus: (tasks, count) => `Empieza por: ${tasks}. Hoy tienes ${count} citas.`, clear: (count) => `Hoy no hay seguimientos pendientes. Tienes ${count} citas programadas.`, draft: (name, task) => `Hola, ${name}:\n\nQuería hacer seguimiento sobre ${task.toLowerCase()}. Avísame si tienes alguna pregunta.\n\nHasta pronto,\nSam`, next: (date, time, name, service) => `Tu próxima cita es ${date} a las ${time} con ${name} para ${service}.`, none: "No hay próximas citas. Añade una desde la agenda.", fallback: "Puedo ayudarte a revisar las prioridades de hoy, tu próxima cita o redactar un seguimiento." },
+      tr: { focus: (tasks, count) => `Önce şunları ele alın: ${tasks}. Bugün ${count} randevunuz var.`, clear: (count) => `Bugün takip edilecek iş yok. ${count} randevunuz planlandı.`, draft: (name, task) => `Merhaba ${name},\n\n${task.toLowerCase()} hakkında kısaca bilgi almak istedim. Sorunuz varsa bana yazabilirsiniz.\n\nGörüşmek üzere,\nSam`, next: (date, time, name, service) => `Bir sonraki randevunuz ${date} saat ${time}: ${name} ile ${service}.`, none: "Yaklaşan randevunuz yok. Program sayfasından ekleyebilirsiniz.", fallback: "Bugünün önceliklerini, sıradaki randevunuzu veya takip mesajı taslağını kontrol etmenize yardımcı olabilirim." }
+    };
+    const uiCopyExtras = {
+      ar: { "Ask what needs attention or get a quick follow-up draft. Suggestions use this demo workspace.": "اسأل عمّا يحتاج إلى اهتمام أو اطلب مسودة متابعة سريعة. تعتمد الاقتراحات على بيانات تجريبية.", "All caught up. Add a reminder whenever something needs a second touch.": "لا توجد مهام معلقة. أضف تذكيرًا عند الحاجة إلى متابعة.", "No clients match that search. Add your first client to get started.": "لا يوجد عملاء مطابقون. أضف أول عميل للبدء.", "e.g. Maya Chen": "مثال: مايا تشين", "e.g. Brand photography": "مثال: تصوير العلامات التجارية", "Anything useful to remember": "أي ملاحظة مفيدة للتذكر", "e.g. Project check-in": "مثال: متابعة المشروع", "e.g. Send the revised proposal": "مثال: إرسال العرض المعدل" },
+      zh: { "Ask what needs attention or get a quick follow-up draft. Suggestions use this demo workspace.": "询问待办重点，或快速起草跟进消息。建议基于演示工作区数据。", "All caught up. Add a reminder whenever something needs a second touch.": "目前没有待办事项。需要再次跟进时可添加提醒。", "No clients match that search. Add your first client to get started.": "没有符合条件的客户。添加第一位客户即可开始。", "e.g. Maya Chen": "例如：Maya Chen", "e.g. Brand photography": "例如：品牌摄影", "Anything useful to remember": "值得记住的备注", "e.g. Project check-in": "例如：项目沟通", "e.g. Send the revised proposal": "例如：发送修订后的提案" },
+      fr: { "Ask what needs attention or get a quick follow-up draft. Suggestions use this demo workspace.": "Identifiez les priorités ou rédigez un suivi. Les suggestions utilisent les données de démonstration.", "All caught up. Add a reminder whenever something needs a second touch.": "Tout est à jour. Ajoutez un rappel lorsqu’un suivi est nécessaire.", "No clients match that search. Add your first client to get started.": "Aucun client ne correspond. Ajoutez votre premier client pour commencer.", "e.g. Maya Chen": "ex. : Maya Chen", "e.g. Brand photography": "ex. : Photographie de marque", "Anything useful to remember": "Une information utile à retenir", "e.g. Project check-in": "ex. : Point sur le projet", "e.g. Send the revised proposal": "ex. : Envoyer la proposition révisée" },
+      de: { "Ask what needs attention or get a quick follow-up draft. Suggestions use this demo workspace.": "Finde wichtige Aufgaben oder entwirf eine Nachricht. Die Vorschläge nutzen Demodaten.", "All caught up. Add a reminder whenever something needs a second touch.": "Alles erledigt. Füge bei Bedarf eine Erinnerung hinzu.", "No clients match that search. Add your first client to get started.": "Keine passenden Kunden. Füge deinen ersten Kunden hinzu.", "e.g. Maya Chen": "z. B. Maya Chen", "e.g. Brand photography": "z. B. Markenfotografie", "Anything useful to remember": "Wichtige Notiz", "e.g. Project check-in": "z. B. Projektbesprechung", "e.g. Send the revised proposal": "z. B. Überarbeitetes Angebot senden" },
+      hi: { "Ask what needs attention or get a quick follow-up draft. Suggestions use this demo workspace.": "ज़रूरी काम पूछें या फ़ॉलो-अप संदेश का मसौदा पाएँ। सुझाव नमूना डेटा पर आधारित हैं।", "All caught up. Add a reminder whenever something needs a second touch.": "सब काम पूरे हैं। आगे फ़ॉलो-अप के लिए रिमाइंडर जोड़ें।", "No clients match that search. Add your first client to get started.": "कोई ग्राहक नहीं मिला। शुरू करने के लिए पहला ग्राहक जोड़ें।", "e.g. Maya Chen": "जैसे: Maya Chen", "e.g. Brand photography": "जैसे: ब्रांड फ़ोटोग्राफ़ी", "Anything useful to remember": "याद रखने योग्य जानकारी", "e.g. Project check-in": "जैसे: प्रोजेक्ट पर चर्चा", "e.g. Send the revised proposal": "जैसे: संशोधित प्रस्ताव भेजें" },
+      pt: { "Ask what needs attention or get a quick follow-up draft. Suggestions use this demo workspace.": "Veja o que precisa de atenção ou crie uma mensagem de acompanhamento. Sugestões usam dados de demonstração.", "All caught up. Add a reminder whenever something needs a second touch.": "Tudo em dia. Adicione um lembrete quando precisar acompanhar algo.", "No clients match that search. Add your first client to get started.": "Nenhum cliente encontrado. Adicione seu primeiro cliente para começar.", "e.g. Maya Chen": "ex.: Maya Chen", "e.g. Brand photography": "ex.: Fotografia de marca", "Anything useful to remember": "Uma observação útil", "e.g. Project check-in": "ex.: Revisão do projeto", "e.g. Send the revised proposal": "ex.: Enviar a proposta revisada" },
+      ru: { "Ask what needs attention or get a quick follow-up draft. Suggestions use this demo workspace.": "Узнайте, что важно, или подготовьте сообщение. Подсказки используют демонстрационные данные.", "All caught up. Add a reminder whenever something needs a second touch.": "Всё выполнено. При необходимости добавьте напоминание.", "No clients match that search. Add your first client to get started.": "Клиенты не найдены. Добавьте первого клиента.", "e.g. Maya Chen": "например, Maya Chen", "e.g. Brand photography": "например, фотосъёмка бренда", "Anything useful to remember": "Полезная заметка", "e.g. Project check-in": "например, обсуждение проекта", "e.g. Send the revised proposal": "например, отправить обновлённое предложение" },
+      es: { "Ask what needs attention or get a quick follow-up draft. Suggestions use this demo workspace.": "Consulta tus prioridades o redacta un seguimiento. Las sugerencias usan datos de demostración.", "All caught up. Add a reminder whenever something needs a second touch.": "Todo al día. Añade un recordatorio cuando necesites volver a contactar.", "No clients match that search. Add your first client to get started.": "No hay clientes coincidentes. Añade tu primer cliente para empezar.", "e.g. Maya Chen": "p. ej., Maya Chen", "e.g. Brand photography": "p. ej., Fotografía de marca", "Anything useful to remember": "Una nota útil", "e.g. Project check-in": "p. ej., Revisión del proyecto", "e.g. Send the revised proposal": "p. ej., Enviar la propuesta revisada" },
+      tr: { "Ask what needs attention or get a quick follow-up draft. Suggestions use this demo workspace.": "Önemli işleri görün veya hızlıca bir takip mesajı taslağı hazırlayın. Öneriler örnek çalışma alanını kullanır.", "All caught up. Add a reminder whenever something needs a second touch.": "Her şey tamam. Yeniden takip etmeniz gereken işler için hatırlatıcı ekleyin.", "No clients match that search. Add your first client to get started.": "Aramayla eşleşen müşteri yok. Başlamak için ilk müşterinizi ekleyin.", "e.g. Maya Chen": "örn. Maya Chen", "e.g. Brand photography": "örn. Marka fotoğrafçılığı", "Anything useful to remember": "Hatırlanacak bir not", "e.g. Project check-in": "örn. Proje görüşmesi", "e.g. Send the revised proposal": "örn. Güncellenmiş teklifi gönder" }
+    };
+    Object.entries(uiCopyExtras).forEach(([language, phrases]) => Object.assign(languagePacks[language], phrases));
+    const originalTextNodes = new WeakMap();
+    const tr = (text) => languagePacks[preferences.language]?.[text] || text;
+    const savePreferences = () => localStorage.setItem(preferencesKey, JSON.stringify(preferences));
+    const applyTheme = () => {
+      document.documentElement.dataset.theme = preferences.theme;
+      document.querySelectorAll("[data-theme-choice]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.themeChoice === preferences.theme)));
+    };
+    const applyLanguage = () => {
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      let node;
+      while ((node = walker.nextNode())) {
+        if (node.parentElement?.closest("script, style")) continue;
+        if (!originalTextNodes.has(node)) originalTextNodes.set(node, node.nodeValue);
+        const original = originalTextNodes.get(node);
+        const plain = original.trim();
+        if (!plain) continue;
+        const leading = original.match(/^\s*/)[0];
+        const trailing = original.match(/\s*$/)[0];
+        node.nodeValue = `${leading}${tr(plain)}${trailing}`;
+      }
+      document.documentElement.lang = preferences.language;
+      document.documentElement.dir = preferences.language === "ar" ? "rtl" : "ltr";
+      document.getElementById("language-select").value = preferences.language;
+      document.getElementById("client-search").placeholder = tr("Search clients");
+      document.getElementById("client-search").setAttribute("aria-label", tr("Search clients"));
+      document.querySelectorAll(".add-client-label").forEach((label) => { label.textContent = tr("Add client"); });
+      document.getElementById("assistant-input").placeholder = tr("What should I focus on?");
+      document.getElementById("quick-add").title = tr("Add appointment");
+      document.getElementById("quick-add").setAttribute("aria-label", tr("Add a new appointment"));
+      document.getElementById("theme-group").setAttribute("aria-label", tr("Color theme"));
+      document.getElementById("assistant-form").querySelector("button").setAttribute("aria-label", tr("Ask assistant"));
+      document.querySelector(".welcome").setAttribute("aria-label", tr("Daily summary"));
+      document.querySelector(".metric-grid").setAttribute("aria-label", tr("Workspace summary"));
+      document.querySelector(".auth-modes").setAttribute("aria-label", tr("Account action"));
+      document.getElementById("auth-email").placeholder = "you@example.com";
+      document.getElementById("auth-password").placeholder = tr("At least 8 characters");
+      document.getElementById("client-name-input").placeholder = tr("e.g. Maya Chen");
+      document.getElementById("client-email-input").placeholder = "maya@example.com";
+      document.getElementById("client-service-input").placeholder = tr("e.g. Brand photography");
+      document.getElementById("client-note-input").placeholder = tr("Anything useful to remember");
+      document.getElementById("appointment-service").placeholder = tr("e.g. Project check-in");
+      document.getElementById("followup-title-input").placeholder = tr("e.g. Send the revised proposal");
+    };
+    const day = (offset) => {
+      const date = new Date();
+      date.setHours(0, 0, 0, 0);
+      date.setDate(date.getDate() + offset);
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const dayOfMonth = String(date.getDate()).padStart(2, "0");
+      return `${date.getFullYear()}-${month}-${dayOfMonth}`;
+    };
+    const initialData = () => ({
+      clients: [
+        { id: "c1", name: "Maya Chen", email: "maya.chen@example.com", service: "Brand photography", note: "Prefers a short check-in before shoots." },
+        { id: "c2", name: "Theo Martin", email: "theo.martin@example.com", service: "Design consulting", note: "Working through the spring launch." },
+        { id: "c3", name: "Aisha Rahman", email: "aisha.r@example.com", service: "Creative coaching", note: "Send session notes after each call." },
+        { id: "c4", name: "Daniel Brooks", email: "daniel.b@example.com", service: "Brand photography", note: "New client. Referred by Maya." }
+      ],
+      appointments: [
+        { id: "a1", clientId: "c1", service: "Brand direction session", date: day(0), time: "09:30", duration: 60 },
+        { id: "a2", clientId: "c2", service: "Launch review", date: day(0), time: "13:00", duration: 60 },
+        { id: "a3", clientId: "c3", service: "Coaching session", date: day(1), time: "10:00", duration: 60 },
+        { id: "a4", clientId: "c4", service: "Discovery call", date: day(2), time: "14:30", duration: 30 },
+        { id: "a5", clientId: "c1", service: "Shoot prep", date: day(4), time: "11:00", duration: 90 },
+        { id: "a6", clientId: "c2", service: "Design review", date: day(6), time: "15:00", duration: 60 }
+      ],
+      followups: [
+        { id: "f1", clientId: "c2", title: "Send the launch review notes", date: day(0), done: false },
+        { id: "f2", clientId: "c1", title: "Confirm the shoot location", date: day(0), done: false },
+        { id: "f3", clientId: "c3", title: "Share the session recap", date: day(1), done: false },
+        { id: "f4", clientId: "c4", title: "Send the welcome questionnaire", date: day(3), done: false }
+      ]
+    });
+    const cloudConfig = window.DAYBOOK_SUPABASE || {};
+    const cloudConfigured = Boolean(cloudConfig.url && cloudConfig.anonKey);
+    const cloudPartiallyConfigured = Boolean(cloudConfig.url || cloudConfig.anonKey) && !cloudConfigured;
+    const requireCloudAuth = Boolean(cloudConfig.requireCloudAuth);
+    let supabaseClient = null;
+    let currentUser = null;
+    let loadedUserId = null;
+    if (cloudConfigured && window.supabase?.createClient) {
+      try { supabaseClient = window.supabase.createClient(cloudConfig.url, cloudConfig.anonKey); }
+      catch (error) { console.error("Unable to initialize Supabase.", error); }
+    }
+    const emptyData = () => ({ clients: [], appointments: [], followups: [] });
+    let data;
+    if (cloudConfigured || cloudPartiallyConfigured || requireCloudAuth) data = emptyData();
+    else {
+      try { data = JSON.parse(localStorage.getItem(storageKey)) || initialData(); }
+      catch { data = initialData(); }
+    }
+    const loadCloudData = async (user) => {
+      if (!supabaseClient) throw new Error("Supabase is unavailable. Check the internet connection and setup.");
+      const [clientsResult, appointmentsResult, followupsResult] = await Promise.all([
+        supabaseClient.from("clients").select("*").order("created_at"),
+        supabaseClient.from("appointments").select("*"),
+        supabaseClient.from("followups").select("*").order("due_date")
+      ]);
+      const failed = [clientsResult, appointmentsResult, followupsResult].find((result) => result.error);
+      if (failed) throw failed.error;
+      currentUser = user;
+      const cloudData = {
+        clients: clientsResult.data.map(({ id, name, email, service, note }) => ({ id, name, email, service, note })),
+        appointments: appointmentsResult.data.map(({ id, client_id, service, appointment_date, appointment_time, duration_minutes }) => ({ id, clientId: client_id, service, date: appointment_date, time: appointment_time.slice(0, 5), duration: duration_minutes })),
+        followups: followupsResult.data.map(({ id, client_id, title, due_date, done }) => ({ id, clientId: client_id, title, date: due_date, done }))
+      };
+      const cloudHasRecords = Object.values(cloudData).some((records) => records.length > 0);
+      let localData = null;
+      if (!cloudHasRecords) {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(storageKey));
+          if (parsed && Array.isArray(parsed.clients) && Array.isArray(parsed.appointments) && Array.isArray(parsed.followups)) localData = parsed;
+        } catch { localData = null; }
+      }
+      data = cloudData;
+      if (localData && window.confirm(tr("Saved records exist in this browser. Import them into this cloud account?"))) {
+        data = localData;
+        await save();
+      }
+      loadedUserId = user.id;
+    };
+    const save = async () => {
+      if (!cloudConfigured) {
+        localStorage.setItem(storageKey, JSON.stringify(data));
+        return;
+      }
+      if (!supabaseClient || !currentUser) throw new Error("Sign in before saving cloud data.");
+      const userId = currentUser.id;
+      const batches = [
+        data.clients.length && supabaseClient.from("clients").upsert(data.clients.map((client) => ({ ...client, user_id: userId })), { onConflict: "user_id,id" }),
+        data.appointments.length && supabaseClient.from("appointments").upsert(data.appointments.map((appointment) => ({ user_id: userId, id: appointment.id, client_id: appointment.clientId, service: appointment.service, appointment_date: appointment.date, appointment_time: appointment.time, duration_minutes: appointment.duration })), { onConflict: "user_id,id" }),
+        data.followups.length && supabaseClient.from("followups").upsert(data.followups.map((task) => ({ user_id: userId, id: task.id, client_id: task.clientId, title: task.title, due_date: task.date, done: task.done })), { onConflict: "user_id,id" })
+      ].filter(Boolean);
+      const results = await Promise.all(batches);
+      const failed = results.find((result) => result.error);
+      if (failed) throw failed.error;
+    };
+    let authMode = "signin";
+    const setAuthFeedback = (message = "", kind = "") => {
+      const feedback = document.getElementById("auth-feedback");
+      feedback.textContent = message;
+      feedback.dataset.kind = kind;
+    };
+    const setAuthMode = (mode) => {
+      authMode = mode;
+      document.querySelectorAll("[data-auth-mode]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.authMode === mode)));
+      const recovery = mode === "recovery";
+      document.getElementById("auth-modes").hidden = recovery;
+      document.getElementById("auth-email-field").hidden = recovery;
+      document.getElementById("auth-email").disabled = recovery;
+      document.getElementById("auth-email").required = !recovery;
+      document.getElementById("auth-title").textContent = tr(recovery ? "Choose a new password" : mode === "signin" ? "Sign in to Daybook" : "Create your Daybook account");
+      document.getElementById("auth-intro").textContent = tr(recovery ? "Set a new password for your account." : "Use your account to access your private client workspace.");
+      document.getElementById("auth-submit").textContent = tr(recovery ? "Update password" : mode === "signin" ? "Sign in" : "Create account");
+      document.getElementById("auth-password").autocomplete = mode === "signin" ? "current-password" : "new-password";
+      document.getElementById("auth-reset").hidden = mode !== "signin";
+      setAuthFeedback();
+    };
+    const showAuthScreen = (message = "", kind = "") => {
+      currentUser = null;
+      loadedUserId = null;
+      data = emptyData();
+      document.getElementById("app-shell").hidden = true;
+      document.getElementById("auth-shell").hidden = false;
+      document.getElementById("signout-button").hidden = true;
+      setAuthMode("signin");
+      setAuthFeedback(message, kind);
+    };
+    const showPasswordRecovery = (user) => {
+      currentUser = user;
+      document.getElementById("app-shell").hidden = true;
+      document.getElementById("auth-shell").hidden = false;
+      document.getElementById("auth-form").reset();
+      setAuthMode("recovery");
+    };
+    const enterCloudWorkspace = async (user) => {
+      if (loadedUserId !== user.id) await loadCloudData(user);
+      currentUser = user;
+      document.getElementById("auth-shell").hidden = true;
+      document.getElementById("app-shell").hidden = false;
+      document.getElementById("signout-button").hidden = false;
+      document.querySelector(".profile-copy strong").textContent = user.email || tr("Cloud account");
+      document.querySelector(".profile-copy span").textContent = tr("Cloud workspace");
+      const requestedPage = location.hash.slice(1);
+      setPage(["overview", "clients", "schedule", "followups", "settings"].includes(requestedPage) ? requestedPage : "overview");
+      render();
+    };
+    const isPasswordRecoveryRedirect = () => {
+      const query = new URLSearchParams(location.search);
+      const hash = new URLSearchParams(location.hash.slice(1));
+      return query.get("type") === "recovery" || hash.get("type") === "recovery";
+    };
+    const initializeCloudAuth = async () => {
+      if (!cloudConfigured) {
+        if (cloudPartiallyConfigured || requireCloudAuth) {
+          showAuthScreen(tr("Cloud setup is incomplete. Check your Supabase URL and public key."), "error");
+          return;
+        }
+        document.getElementById("auth-shell").hidden = true;
+        document.getElementById("app-shell").hidden = false;
+        const requestedPage = location.hash.slice(1);
+        setPage(["overview", "clients", "schedule", "followups", "settings"].includes(requestedPage) ? requestedPage : "overview");
+        render();
+        return;
+      }
+      document.getElementById("app-shell").hidden = true;
+      document.getElementById("auth-shell").hidden = false;
+      if (!supabaseClient) {
+        showAuthScreen(tr("Cloud setup is incomplete. Check your Supabase URL and public key."), "error");
+        return;
+      }
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        window.setTimeout(() => {
+          if (session && (event === "PASSWORD_RECOVERY" || isPasswordRecoveryRedirect())) showPasswordRecovery(session.user);
+          else if (session && event !== "INITIAL_SESSION") enterCloudWorkspace(session.user).catch((loadError) => {
+            console.error("Unable to load the cloud workspace.", loadError);
+            showAuthScreen(tr("Could not load your workspace. Check the database setup and try again."), "error");
+          });
+          else if (event === "SIGNED_OUT") showAuthScreen();
+        }, 0);
+      });
+      const { data: sessionData, error } = await supabaseClient.auth.getSession();
+      if (error) {
+        showAuthScreen(tr("Could not check your sign-in. Please refresh and try again."), "error");
+        return;
+      }
+      if (sessionData.session) {
+        try {
+          if (isPasswordRecoveryRedirect()) showPasswordRecovery(sessionData.session.user);
+          else await enterCloudWorkspace(sessionData.session.user);
+        }
+        catch (loadError) {
+          console.error("Unable to load the cloud workspace.", loadError);
+          showAuthScreen(tr("Could not load your workspace. Check the database setup and try again."), "error");
+        }
+      } else showAuthScreen();
+    };
+    const persistChange = async (message, form, dialog) => {
+      try {
+        await save();
+        render();
+        if (form) form.reset();
+        if (dialog) dialog.close();
+        toast(tr(message));
+      } catch (error) {
+        console.error("Unable to save Daybook data.", error);
+        if (cloudConfigured && currentUser) {
+          try { await loadCloudData(currentUser); render(); }
+          catch (loadError) { console.error("Unable to restore cloud data.", loadError); }
+        }
+        toast(tr("Could not save your changes. Please try again."));
+      }
+    };
+    const byId = (id) => data.clients.find((client) => client.id === id);
+    const safeText = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+    const activeLocale = () => ({ en: "en-US", az: "az-AZ", ar: "ar-SA", zh: "zh-CN", fr: "fr-FR", de: "de-DE", hi: "hi-IN", pt: "pt-BR", ru: "ru-RU", es: "es-ES", tr: "tr-TR" })[preferences.language] || "en-US";
+    const formatDate = (value, options = { month: "short", day: "numeric" }) => {
+      const date = new Date(`${value}T12:00:00`);
+      if (preferences.language !== "az") return date.toLocaleDateString(activeLocale(), options);
+      const months = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avqust", "sentyabr", "oktyabr", "noyabr", "dekabr"];
+      const weekdays = ["bazar", "bazar ertəsi", "çərşənbə axşamı", "çərşənbə", "cümə axşamı", "cümə", "şənbə"];
+      const parts = [];
+      if (options.weekday) {
+        const weekday = weekdays[date.getDay()];
+        parts.push(options.weekday === "short" ? weekday.slice(0, 3) : weekday);
+      }
+      if (options.day) parts.push(String(date.getDate()));
+      if (options.month) parts.push(options.month === "long" ? months[date.getMonth()] : months[date.getMonth()].slice(0, 3));
+      return parts.join(" ");
+    };
+    const formatTime = (value) => new Date(`2000-01-01T${value}`).toLocaleTimeString(activeLocale(), { hour: "numeric", minute: "2-digit" });
+    const initials = (name) => name.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toUpperCase();
+    const orderedAppointments = () => [...data.appointments].sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`));
+    const toast = (message) => {
+      const element = document.getElementById("toast");
+      element.textContent = message;
+      element.classList.add("show");
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => element.classList.remove("show"), 2500);
+    };
+    const setPage = (page) => {
+      document.querySelectorAll(".page").forEach((section) => section.classList.toggle("active", section.id === `page-${page}`));
+      document.querySelectorAll(".nav-button").forEach((button) => {
+        if (button.dataset.page === page) button.setAttribute("aria-current", "page");
+        else button.removeAttribute("aria-current");
+      });
+      document.getElementById("breadcrumb-page").textContent = ({ overview: tr("Overview"), clients: tr("Clients"), schedule: tr("Schedule"), followups: tr("Follow-ups"), settings: tr("Settings") })[page];
+      history.replaceState(null, "", `#${page}`);
+    };
+    const emptyRow = (message) => `<tr><td colspan="5" class="empty-state">${message}</td></tr>`;
+    const renderClients = () => {
+      const query = document.getElementById("client-search").value.trim().toLowerCase();
+      const filtered = data.clients.filter((client) => `${client.name} ${client.email} ${client.service}`.toLowerCase().includes(query));
+      const rows = filtered.map((client) => {
+        const upcoming = orderedAppointments().find((appointment) => appointment.clientId === client.id && appointment.date >= day(0));
+        return `<tr><td><div class="client-name"><span class="client-avatar">${safeText(initials(client.name))}</span>${safeText(client.name)}</div></td><td>${safeText(client.service)}</td><td class="client-email">${safeText(client.email)}</td><td>${upcoming ? `${formatDate(upcoming.date)} · ${formatTime(upcoming.time)}` : tr("Not scheduled")}</td><td><span class="status">${tr("Active")}</span></td></tr>`;
+      }).join("");
+      document.getElementById("client-rows").innerHTML = rows || emptyRow(query ? tr("No clients match that search. Add your first client to get started.") : tr("Add your first client to get started."));
+      document.getElementById("client-empty").hidden = true;
+    };
+    const appointmentMarkup = (appointment, compact = false) => {
+      const client = byId(appointment.clientId);
+      if (!client) return "";
+      return `<div class="${compact ? "schedule-event" : "appointment"}"><span class="appt-time">${formatTime(appointment.time)}</span><span class="appt-rule" aria-hidden="true"></span><div class="appt-info"><strong>${safeText(appointment.service)}</strong><span>${safeText(client.name)} · ${appointment.duration} ${tr("min")}</span></div><span class="appt-status">${tr("Booked")}</span></div>`;
+    };
+    const taskMarkup = (task, dashboard = false) => {
+      const client = byId(task.clientId);
+      if (!client) return "";
+      const due = task.date <= day(0) ? (task.date < day(0) ? tr("Overdue") : tr("Today")) : formatDate(task.date);
+      return dashboard
+        ? `<label class="task"><input type="checkbox" data-complete-task="${safeText(task.id)}" aria-label="Complete ${safeText(task.title)}"><span><strong>${safeText(task.title)}</strong><span>${safeText(client.name)}</span></span><time>${due}</time></label>`
+        : `<div class="followup-row"><input type="checkbox" data-complete-task="${safeText(task.id)}" aria-label="Complete ${safeText(task.title)}"><div class="followup-main"><strong>${safeText(task.title)}</strong><span>${safeText(client.email)}</span></div><span class="followup-client">${safeText(client.name)}</span><time class="followup-due">${due}</time></div>`;
+    };
+    const renderSelectOptions = () => {
+      const options = data.clients.map((client) => `<option value="${safeText(client.id)}">${safeText(client.name)}</option>`).join("");
+      document.getElementById("appointment-client").innerHTML = options;
+      document.getElementById("followup-client-select").innerHTML = options;
+    };
+    const render = () => {
+      const today = day(0);
+      const clients = data.clients;
+      const appointments = orderedAppointments();
+      const openTasks = data.followups.filter((task) => !task.done).sort((a, b) => a.date.localeCompare(b.date));
+      const todayAppointments = appointments.filter((appointment) => appointment.date === today);
+      document.getElementById("today-label").textContent = formatDate(today, { weekday: "short", month: "short", day: "numeric" });
+      document.getElementById("overview-date").textContent = formatDate(today, { weekday: "long", month: "long", day: "numeric" });
+      document.getElementById("greeting").textContent = preferences.language === "en" ? `${new Date().toLocaleDateString(activeLocale(), { weekday: "long" }).toUpperCase()} AT A GLANCE` : tr("YOUR DAY, AT A GLANCE");
+      const greeting = new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 18 ? "Good afternoon" : "Good evening";
+      document.getElementById("overview-title").textContent = `${tr(greeting)}, Sam`;
+      document.getElementById("metric-clients").textContent = clients.length;
+      document.getElementById("metric-today").textContent = todayAppointments.length;
+      document.getElementById("metric-followups").textContent = openTasks.length;
+      document.getElementById("metric-hours").textContent = `${(todayAppointments.reduce((sum, item) => sum + Number(item.duration), 0) / 60).toFixed(1).replace(/\.0$/, "")}${preferences.language === "az" ? " saat" : "h"}`;
+      document.getElementById("client-nav-count").textContent = clients.length;
+      document.getElementById("task-nav-count").textContent = openTasks.length;
+      document.getElementById("today-appointments").innerHTML = todayAppointments.length ? todayAppointments.map((item) => appointmentMarkup(item)).join("") : `<div class="empty-state">${tr("No sessions booked today. A little breathing room.")}</div>`;
+      document.getElementById("dashboard-tasks").innerHTML = openTasks.slice(0, 3).map((task) => taskMarkup(task, true)).join("") || `<div class="empty-state">${tr("Nothing waiting on you. Nice work.")}</div>`;
+      renderClients();
+      renderSelectOptions();
+      const future = appointments.filter((appointment) => appointment.date >= today);
+      const grouped = new Map();
+      future.forEach((appointment) => grouped.set(appointment.date, [...(grouped.get(appointment.date) || []), appointment]));
+      document.getElementById("schedule-list").innerHTML = [...grouped.entries()].map(([date, items]) => `<section class="schedule-day"><div class="day-label"><strong>${date === today ? tr("Today") : formatDate(date, { weekday: "long" })}</strong><span>${formatDate(date, { month: "long", day: "numeric" })}</span></div><div class="day-events">${items.map((item) => appointmentMarkup(item, true)).join("")}</div></section>`).join("") || `<div class="empty-state">${tr("No appointments yet. Add one to start shaping your week.")}</div>`;
+      document.getElementById("followup-list").innerHTML = openTasks.map((task) => taskMarkup(task)).join("");
+      document.getElementById("followup-empty").hidden = openTasks.length > 0;
+      document.getElementById("followup-open-count").textContent = preferences.language === "az" ? `${openTasks.length} açıq` : `${openTasks.length} open`;
+    };
+    document.querySelectorAll("[data-page]").forEach((button) => button.addEventListener("click", () => setPage(button.dataset.page)));
+    document.querySelectorAll("[data-go-page]").forEach((button) => button.addEventListener("click", () => setPage(button.dataset.goPage)));
+    document.querySelectorAll("[data-auth-mode]").forEach((button) => button.addEventListener("click", () => setAuthMode(button.dataset.authMode)));
+    document.getElementById("auth-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!supabaseClient) {
+        setAuthFeedback(tr("Cloud setup is incomplete. Check your Supabase URL and public key."), "error");
+        return;
+      }
+      const form = new FormData(event.currentTarget);
+      const credentials = { email: form.get("email")?.trim() || "", password: form.get("password") };
+      try {
+        const result = authMode === "recovery"
+          ? await supabaseClient.auth.updateUser({ password: credentials.password })
+          : authMode === "signin"
+            ? await supabaseClient.auth.signInWithPassword(credentials)
+            : await supabaseClient.auth.signUp({ ...credentials, options: { emailRedirectTo: window.location.href.split("#")[0] } });
+        if (result.error) {
+          setAuthFeedback(result.error.message, "error");
+        } else if (authMode === "recovery") {
+          setAuthFeedback(tr("Password updated. Opening your workspace…"), "success");
+          const cleanUrl = new URL(window.location.href);
+          cleanUrl.searchParams.delete("type");
+          cleanUrl.hash = "";
+          history.replaceState(null, "", cleanUrl.toString());
+          if (result.data.user) await enterCloudWorkspace(result.data.user);
+        } else if (authMode === "signup" && !result.data.session) {
+          setAuthFeedback(tr("Check your email to confirm your account, then sign in."), "success");
+        } else {
+          setAuthFeedback(tr("Signed in. Loading your workspace…"), "success");
+        }
+      } catch (error) {
+        setAuthFeedback(error.message || tr("Could not check your sign-in. Please refresh and try again."), "error");
+      }
+    });
+    document.getElementById("auth-reset").addEventListener("click", async () => {
+      if (!supabaseClient) {
+        setAuthFeedback(tr("Cloud setup is incomplete. Check your Supabase URL and public key."), "error");
+        return;
+      }
+      const email = document.getElementById("auth-email").value.trim();
+      if (!email) {
+        setAuthFeedback(tr("Enter your email address first."), "error");
+        document.getElementById("auth-email").focus();
+        return;
+      }
+      try {
+        const redirect = new URL(window.location.href);
+        redirect.hash = "";
+        redirect.searchParams.set("type", "recovery");
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: redirect.toString() });
+        setAuthFeedback(error ? error.message : tr("Password reset instructions were sent to your email."), error ? "error" : "success");
+      } catch (error) {
+        setAuthFeedback(error.message || tr("Could not check your sign-in. Please refresh and try again."), "error");
+      }
+    });
+    document.getElementById("signout-button").addEventListener("click", async () => {
+      try {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) toast(tr("Could not sign out. Please try again."));
+      } catch (error) {
+        toast(tr("Could not sign out. Please try again."));
+      }
+    });
+    document.querySelectorAll("[data-theme-choice]").forEach((button) => button.addEventListener("click", () => {
+      preferences.theme = button.dataset.themeChoice;
+      savePreferences();
+      applyTheme();
+    }));
+    document.getElementById("language-select").addEventListener("change", (event) => {
+      preferences.language = event.target.value;
+      savePreferences();
+      applyLanguage();
+      render();
+      const currentPage = ["overview", "clients", "schedule", "followups", "settings"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "overview";
+      setPage(currentPage);
+    });
+    document.querySelectorAll("[data-open-dialog]").forEach((button) => button.addEventListener("click", () => {
+      const type = button.dataset.openDialog;
+      if (type !== "client" && data.clients.length === 0) { toast(tr("Add a client before creating an appointment.")); return; }
+      if (type === "appointment") {
+        document.getElementById("appointment-date").value = day(0);
+        document.getElementById("appointment-time").value = "10:00";
+      }
+      document.getElementById(`${type}-dialog`).showModal();
+    }));
+    document.getElementById("quick-add").addEventListener("click", () => {
+      if (!data.clients.length) { toast(tr("Add a client before creating an appointment.")); return; }
+      document.getElementById("appointment-date").value = day(0);
+      document.getElementById("appointment-time").value = "10:00";
+      document.getElementById("appointment-dialog").showModal();
+    });
+    document.querySelectorAll("[data-close-dialog]").forEach((button) => button.addEventListener("click", () => button.closest("dialog").close()));
+    document.getElementById("client-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formElement = event.currentTarget;
+      const form = new FormData(formElement);
+      data.clients.push({ id: `c${crypto.randomUUID()}`, name: form.get("name").trim(), email: form.get("email").trim(), service: form.get("service").trim(), note: form.get("note").trim() });
+      await persistChange("Client added to your workspace.", formElement, document.getElementById("client-dialog"));
+    });
+    document.getElementById("appointment-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formElement = event.currentTarget;
+      const form = new FormData(formElement);
+      data.appointments.push({ id: `a${crypto.randomUUID()}`, clientId: form.get("clientId"), service: form.get("service").trim(), date: form.get("date"), time: form.get("time"), duration: Number(form.get("duration")) });
+      await persistChange("Appointment added to your schedule.", formElement, document.getElementById("appointment-dialog"));
+    });
+    document.getElementById("followup-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formElement = event.currentTarget;
+      const form = new FormData(formElement);
+      data.followups.push({ id: `f${crypto.randomUUID()}`, clientId: form.get("clientId"), title: form.get("title").trim(), date: form.get("date"), done: false });
+      await persistChange("Reminder added.", formElement, document.getElementById("followup-dialog"));
+    });
+    document.getElementById("new-followup").addEventListener("click", () => {
+      if (!data.clients.length) { toast(tr("Add a client before creating a reminder.")); return; }
+      document.getElementById("followup-date-input").value = day(0);
+      document.getElementById("followup-dialog").showModal();
+    });
+    document.getElementById("client-search").addEventListener("input", renderClients);
+    document.addEventListener("change", async (event) => {
+      const id = event.target.dataset.completeTask;
+      if (!id) return;
+      const task = data.followups.find((item) => item.id === id);
+      if (!task) return;
+      task.done = true;
+      await persistChange("Follow-up marked complete.");
+    });
+    document.getElementById("assistant-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const input = document.getElementById("assistant-input");
+      const reply = document.getElementById("assistant-reply");
+      const question = input.value.trim().toLowerCase();
+      const openTasks = data.followups.filter((task) => !task.done).sort((a, b) => a.date.localeCompare(b.date));
+      const todayAppointments = orderedAppointments().filter((appointment) => appointment.date === day(0));
+      const copy = assistantCopy[preferences.language] || assistantCopy.en;
+      let answer;
+      if (!question || /focus|priorit|today|start|diqqət|prioritet|bu gün|başla|hoy|prioridad|heute|fokus|aujourd|priorité|сегодня|приоритет|bugün|öncelik|今日|今天|优先|اليوم|اليوم|आज|प्राथमिकता|hoje|prioridade/.test(question)) {
+        const due = openTasks.filter((task) => task.date <= day(0));
+        const dueSummary = due.map((task) => `${task.title} (${byId(task.clientId)?.name || ""})`).join("; ");
+        answer = due.length ? copy.focus(dueSummary, todayAppointments.length) : copy.clear(todayAppointments.length);
+      } else if (/draft|write|message|follow|yaz|mesaj|izlə|borrador|mensaje|nachricht|entwurf|relance|rédig|сообщ|чернов|takip|taslak|跟进|消息|提醒|متابعة|رسالة|फ़ॉलो|संदेश|acompanh|mensagem/.test(question)) {
+        const task = openTasks[0];
+        const client = task && byId(task.clientId);
+        answer = client ? copy.draft(client.name.split(" ")[0], task.title) : tr("You have no open follow-ups to draft for. Add a reminder first, and I can help shape it into a message.");
+      } else if (/schedule|appointment|meeting|cədvəl|görüş|agenda|cita|termin|rendez-vous|reunión|распис|встреч|randevu|预约|行程|موعد|बैठक|program/.test(question)) {
+        const next = orderedAppointments().find((appointment) => appointment.date >= day(0));
+        const nextDate = next ? next.date === day(0) ? tr("Today") : formatDate(next.date, { weekday: "long", month: "short", day: "numeric" }) : "";
+        answer = next ? copy.next(nextDate, formatTime(next.time), byId(next.clientId)?.name || "", next.service) : copy.none;
+      } else {
+        answer = copy.fallback;
+      }
+      reply.textContent = answer;
+      reply.classList.add("visible");
+      input.value = "";
+    });
+    document.getElementById("assistant-shortcut").addEventListener("click", (event) => {
+      event.preventDefault();
+      setPage("overview");
+      document.getElementById("assistant-input").focus();
+      document.getElementById("assistant").scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    document.addEventListener("click", (event) => {
+      const pageLink = event.target.closest('a[href^="#"]');
+      if (!pageLink || pageLink.id === "assistant-shortcut") return;
+      const page = pageLink.getAttribute("href").slice(1);
+      if (["overview", "clients", "schedule", "followups", "settings"].includes(page)) setPage(page);
+    });
+    document.getElementById("appointment-client").addEventListener("change", (event) => {
+      const client = byId(event.target.value);
+      if (client) document.getElementById("appointment-service").value = client.service;
+    });
+    applyTheme();
+    applyLanguage();
+    setAuthMode(authMode);
+    initializeCloudAuth().catch((error) => {
+      console.error("Unable to initialize Daybook.", error);
+      showAuthScreen(tr("Could not start Daybook. Refresh the page and try again."), "error");
+    });
+  </script>
+</body>
+</html>
